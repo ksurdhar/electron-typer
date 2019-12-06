@@ -1,31 +1,20 @@
-import React from "react"
+import React, { useState } from 'react'
 import ReactQuill from 'react-quill'
 
 import 'react-quill/dist/quill.snow.css'
 
-class Quill extends React.Component { // update to use hooks
-  constructor(props) {
-    super(props)
+// remove / play around with styling
+// try to port over repositioning logic.
+// add linting
+// consider typescript, with easy compilation rules 
 
-    this.state = { 
-      text: '' 
-    }
+export const Quill = () => { 
+  const [text, setText] = useState('')
 
-    this.handleChange = this.handleChange.bind(this)
-  }
-
-  handleChange(value) {
-    this.setState({ text: value })
-  }
-
-  render() {
-    return (
-      <ReactQuill 
-        value={this.state.text}
-        onChange={this.handleChange} 
-      />
-    )
-  }
+  return (
+    <ReactQuill 
+      value={text}
+      onChange={setText} 
+    />
+  )
 }
-
-export default Quill
