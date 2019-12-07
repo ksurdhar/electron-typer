@@ -3,18 +3,20 @@ import ReactQuill from 'react-quill'
 
 import 'react-quill/dist/quill.snow.css'
 
-// remove / play around with styling
-// try to port over repositioning logic.
+// redo repositioning logic
 // add linting
 // consider typescript, with easy compilation rules 
 
-export const Quill = () => { 
+export const Editor = () => { 
   const [text, setText] = useState('')
 
   return (
     <ReactQuill 
       value={text}
       onChange={setText} 
+      modules={
+        { toolbar: '#hidden-toolbar' }
+      }
     />
   )
 }

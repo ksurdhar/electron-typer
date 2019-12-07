@@ -1,13 +1,22 @@
-import './index.css'
-import { Quill } from './ui/test'
-
-console.log('👋 This message is being logged by "renderer.js", included via webpack')
-
+/** @jsx jsx */
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { css, jsx } from '@emotion/core' 
+import { Editor } from './ui/editor'
+import './index.css'
+
+const toolbarStyles = css`
+  display: none
+`
 
 const App = () => {
-  return <Quill/>
+  return (
+    <>
+      <div id='hidden-toolbar' css={toolbarStyles} />
+      <Editor/>
+    </>
+  )
+  
 }
 
 ReactDOM.render(<App/>, document.querySelector('#root'))
