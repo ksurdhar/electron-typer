@@ -15,20 +15,24 @@ const containerCss = css`
 
 const topSpacerCss = css`
   height: calc(40% - 22px);
-  background-color: red;
+  background-color: lightblue;
 `
 
 const bottomSpacerCss = css`
   height: calc(60% - 22px);
-  background-color: blue;
+  background-color: lightblue;
 `
 
 const App = () => {
+  let containerRef = React.createRef()
+  const getContainer = () => {
+    return containerRef
+  }
   return (
-    <div css={containerCss}>
+    <div css={containerCss} ref={containerRef}>
       <div id='top-spacer' css={topSpacerCss}/>
       <div id='hidden-toolbar' css={toolbarStyles} />
-      <Editor/>
+      <Editor getContainer={getContainer} />
       <div id='bottom-spacer' css={bottomSpacerCss}/>
     </div>
   )

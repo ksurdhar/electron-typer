@@ -16,8 +16,9 @@ const ROW_HEIGHT = 18 // hardcoded. would be better if dynamic
 // when row changes, animate upwards.
 // did it by adjusting scrollheight with spacers to make it 100% height immediately
 
-export const Editor = () => { 
+export const Editor = (props) => { 
   const [text, setText] = useState('')
+  const [row, setRow] = useState(1)
   let wrapperRef = React.createRef()
   
   const changeHandler = (content, delta, source, editor) => {
@@ -33,6 +34,11 @@ export const Editor = () => {
           const { top } = editor.getBounds(range.index)
           const rowNumber = (top - 14 + ROW_HEIGHT) / ROW_HEIGHT 
           console.log(rowNumber)
+          if (row !== rowNumber) {
+            // adjust scroll position
+            console.log(props.getContainer().current)
+          }
+          setRow(rowNumber)
         }}
         modules={
           { toolbar: '#hidden-toolbar' }
