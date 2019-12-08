@@ -14,6 +14,7 @@ const ROW_HEIGHT = 18 // hardcoded. would be better if dynamic
 
 // set position of editor where you want it
 // when row changes, animate upwards.
+// did it by adjusting scrollheight with spacers to make it 100% height immediately
 
 export const Editor = () => { 
   const [text, setText] = useState('')
