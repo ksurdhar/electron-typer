@@ -33,10 +33,11 @@ export const Editor = (props) => {
         onChangeSelection={(range, source, editor) => {
           const { top } = editor.getBounds(range.index)
           const rowNumber = (top - 14 + ROW_HEIGHT) / ROW_HEIGHT 
-          console.log(rowNumber)
+          // console.log(rowNumber)
           if (row !== rowNumber) {
-            // adjust scroll position
-            console.log(props.getContainer().current)
+            // const container = props.getContainer().current
+            // const difference = container.scrollHeight - container.clientHeight
+            window.scrollTo({ top: top, behavior: 'smooth' }) // need to adjust jerkiness by playing around with padding
           }
           setRow(rowNumber)
         }}
