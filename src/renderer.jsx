@@ -16,7 +16,6 @@ const App = () => {
       <Editor/>
     </>
   )
-  
 }
 
 ReactDOM.render(<App/>, document.querySelector('#root'))
