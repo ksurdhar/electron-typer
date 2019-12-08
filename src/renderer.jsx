@@ -15,12 +15,13 @@ const containerCss = css`
 
 const topSpacerCss = css`
   height: calc(40% - 22px);
-  background-color: lightblue;
+  background-color: #fffaf4;
+;
 `
 
 const bottomSpacerCss = css`
   height: calc(60% - 22px);
-  background-color: lightblue;
+  background-color: #fffaf4;
 `
 
 const App = () => {

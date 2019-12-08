@@ -8,8 +8,8 @@ body {
   max-width: 38rem;
   align-items: center;
   background: #fffaf4;
-  height: calc(100% - 20px); 
-  padding-bottom: 20px;
+  height: calc(100%); 
+  /* padding-bottom: 42px; */
 }
 
 #root {

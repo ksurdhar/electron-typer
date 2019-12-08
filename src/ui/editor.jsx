@@ -37,7 +37,9 @@ export const Editor = (props) => {
           if (row !== rowNumber) {
             // const container = props.getContainer().current
             // const difference = container.scrollHeight - container.clientHeight
-            window.scrollTo({ top: top, behavior: 'smooth' }) // need to adjust jerkiness by playing around with padding
+            setTimeout(() => {
+              window.scrollTo({ top: top - 14, behavior: 'smooth' })
+            }, 200)
           }
           setRow(rowNumber)
         }}
