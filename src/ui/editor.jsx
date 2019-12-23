@@ -17,16 +17,43 @@ const ROW_HEIGHT = 18 // hardcoded. would be better if dynamic
 // when row changes, animate upwards.
 // did it by adjusting scrollheight with spacers to make it 100% height immediately
 
+function reverseString(str) {
+  return (str === '') ? '' : reverseString(str.substr(1)) + str.charAt(0);
+}
+
 export const Editor = (props) => { 
   const [text, setText] = useState('')
   const [row, setRow] = useState(1)
   const [quilly, setQuilly] = useState()
   let wrapperRef = React.createRef()
   let quillRef = React.createRef()
-  console.log('RENDERING')
+  // console.log('RENDERING')
   
   const changeHandler = (content, delta, source, editor) => {
     setText(content)
+  }
+
+  const colorRows = (range) => {
+    const [line, offset] = quilly.getLine(range.index)
+    const charactersInRow = line.cache.length
+    const endOfLinePosition = range.index + charactersInRow - offset
+
+    // up to current row
+    quilly.formatText(0, endOfLinePosition, {
+      'color': 'black'
+    })
+    // beneath current row
+    quilly.formatText(endOfLinePosition, quilly.getLength(), {
+      'color': 'blue'
+    })
+  }
+
+  const keyPressHandler = (event) => {
+    // console.log('key press', event.key)
+    // get the current index
+    // parse the whole document :(
+    // regex for the word where we are
+    // if the world
   }
 
   return (
@@ -34,6 +61,7 @@ export const Editor = (props) => {
       <ReactQuill
         ref={quillRef}
         value={text}
+        onKeyPress={keyPressHandler}
         onChange={changeHandler}
         onChangeSelection={(range, source, editor) => {
           const { top } = editor.getBounds(range.index)
@@ -52,19 +80,17 @@ export const Editor = (props) => {
           }
         
           setRow(rowNumber)
+          colorRows(range)
 
-          const [ line, offset ] = quilly.getLine(range.index)
-          const charactersInRow = line.cache.length
-          const endOfLinePosition = range.index + charactersInRow - offset
-          
-          // up to current row
-          quilly.formatText(0, endOfLinePosition, {
-            'color': 'black'
-          })
-          // beneath current row
-          quilly.formatText(endOfLinePosition, quilly.getLength(), {
-            'color': 'blue'
-          })
+          // console.log('leaf', quilly.getLeaf(range.index))
+          const [blot, offset] = quilly.getLeaf(range.index)
+          const currentChar = blot.text.substring(offset - 1) // might need to play around with this
+          const revString = reverseString(blot.text)
+          console.log('revString', revString)
+          console.log('current Char', currentChar)
+          // if you're at index 9, and there are 10 - total - position
+          const revIndex = blot.text.length - offset
+          console.log('rev index', revIndex)
         }}
         modules={
           { toolbar: '#hidden-toolbar' }
