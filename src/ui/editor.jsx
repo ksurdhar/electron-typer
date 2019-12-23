@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import ReactQuill from 'react-quill'
+// import Quill from 'quill'
 
 import 'react-quill/dist/quill.snow.css'
 
@@ -16,10 +17,15 @@ const ROW_HEIGHT = 18 // hardcoded. would be better if dynamic
 // when row changes, animate upwards.
 // did it by adjusting scrollheight with spacers to make it 100% height immediately
 
+// with a proper react component as a class, shouldComponentUpdate could be used to prevent rerenders
+
 export const Editor = (props) => { 
   const [text, setText] = useState('')
   const [row, setRow] = useState(1)
+  const [quilly, setQuilly] = useState()
   let wrapperRef = React.createRef()
+  let quillRef = React.createRef()
+  console.log('RENDERING')
   
   const changeHandler = (content, delta, source, editor) => {
     setText(content)
@@ -28,6 +34,7 @@ export const Editor = (props) => {
   return (
     <div ref={wrapperRef}>
       <ReactQuill
+        ref={quillRef}
         value={text}
         onChange={changeHandler}
         onChangeSelection={(range, source, editor) => {
@@ -41,7 +48,22 @@ export const Editor = (props) => {
               window.scrollTo({ top: top - 14, behavior: 'smooth' })
             }, 200)
           }
+          
+          if (!quilly) {
+            setQuilly(quillRef.current.getEditor())
+          }
+          
+         
           setRow(rowNumber)
+          
+          //before
+          quilly.formatText(0, range.index, {
+            'color': 'black'
+          })
+          //current
+          quilly.formatText(range.index, quilly.getLength(), {
+            'color': 'blue'
+          })
         }}
         modules={
           { toolbar: '#hidden-toolbar' }
