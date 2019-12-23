@@ -17,8 +17,6 @@ const ROW_HEIGHT = 18 // hardcoded. would be better if dynamic
 // when row changes, animate upwards.
 // did it by adjusting scrollheight with spacers to make it 100% height immediately
 
-// with a proper react component as a class, shouldComponentUpdate could be used to prevent rerenders
-
 export const Editor = (props) => { 
   const [text, setText] = useState('')
   const [row, setRow] = useState(1)
@@ -52,16 +50,19 @@ export const Editor = (props) => {
           if (!quilly) {
             setQuilly(quillRef.current.getEditor())
           }
-          
-         
+        
           setRow(rowNumber)
+
+          const [ line, offset ] = quilly.getLine(range.index)
+          const charactersInRow = line.cache.length
+          const endOfLinePosition = range.index + charactersInRow - offset
           
-          //before
-          quilly.formatText(0, range.index, {
+          // up to current row
+          quilly.formatText(0, endOfLinePosition, {
             'color': 'black'
           })
-          //current
-          quilly.formatText(range.index, quilly.getLength(), {
+          // beneath current row
+          quilly.formatText(endOfLinePosition, quilly.getLength(), {
             'color': 'blue'
           })
         }}
