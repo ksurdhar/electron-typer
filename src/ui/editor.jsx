@@ -9,15 +9,12 @@ const ROW_HEIGHT = 18 // hardcoded. would be better if dynamic
 // const editorHeight = wrapperRef.current.clientHeight - 26 // removes padding
 // const totalRows = editorHeight / ROW_HEIGHT
 
-// set position of editor where you want it
-// when row changes, animate upwards.
-// did it by adjusting scrollheight with spacers to make it 100% height immediately 
-
 class Editor extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
       text: '',
+      word: '',
       row: 1
     }
     this.quillRef = React.createRef()
@@ -38,25 +35,37 @@ class Editor extends React.Component {
     }
   }
 
+  determineWord(range) {
+    const [blot, offset] = this.quilly.getLeaf(range.index)
+
+    const secondHalf = blot.text ? blot.text.substring(offset - 1) : ''
+    const firstHalf = blot.text ? blot.text.substring(0, offset - 1) : ''
+
+    const firstSubstr = firstHalf.split(' ').pop()
+    const secondSubstr = secondHalf.split(' ')[0]
+
+    return `${firstSubstr}${secondSubstr}`
+  }
+
+  colorRows(range) {
+    const [line, offset] = this.quilly.getLine(range.index)
+    const charactersInRow = line.cache.length
+    const endOfLinePosition = range.index + charactersInRow - offset
+
+    // up to current row
+    this.quilly.formatText(0, endOfLinePosition, {
+      'color': 'black'
+    })
+    // beneath current row
+    this.quilly.formatText(endOfLinePosition, this.quilly.getLength(), {
+      'color': 'blue'
+    })
+  }
+
   render() {
     const changeHandler = (content, delta, source, editor) => {
       this.setState({
         text: content
-      })
-    }
-
-    const colorRows = (range) => {
-      const [line, offset] = this.quilly.getLine(range.index)
-      const charactersInRow = line.cache.length
-      const endOfLinePosition = range.index + charactersInRow - offset
-
-      // up to current row
-      this.quilly.formatText(0, endOfLinePosition, {
-        'color': 'black'
-      })
-      // beneath current row
-      this.quilly.formatText(endOfLinePosition, this.quilly.getLength(), {
-        'color': 'blue'
       })
     }
 
@@ -88,25 +97,13 @@ class Editor extends React.Component {
             if (!this.quilly) {
               this.quilly = this.quillRef.current.getEditor()
             }
+        
+            this.colorRows(range)
 
             this.setState({
-              row: rowNumber
+              row: rowNumber,
+              word: this.determineWord(range)
             })
-            colorRows(range)
-
-            // console.log('leaf', quilly.getLeaf(range.index))
-            const [blot, offset] = this.quilly.getLeaf(range.index)
-            const secondHalf = blot.text.substring(offset - 1)
-            const firstHalf = blot.text.substring(0, offset - 1)
-
-            const firstSubstr = firstHalf.split(' ').pop()
-            const secondSubstr = secondHalf.split(' ')[0]
-
-            const word = `${firstSubstr}${secondSubstr}`
-            console.log('word', word)
-
-            // const revIndex = blot.text.length - offset
-            // console.log('rev index', revIndex)
           }}
           modules={this.modules}
         />
