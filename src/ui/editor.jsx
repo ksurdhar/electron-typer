@@ -21,6 +21,11 @@ function reverseString(str) {
   return (str === '') ? '' : reverseString(str.substr(1)) + str.charAt(0);
 }
 
+
+const tabHandler = () => {
+  console.log('hello')
+}
+
 export const Editor = (props) => { 
   const [text, setText] = useState('')
   const [row, setRow] = useState(1)
@@ -84,16 +89,30 @@ export const Editor = (props) => {
 
           // console.log('leaf', quilly.getLeaf(range.index))
           const [blot, offset] = quilly.getLeaf(range.index)
-          const currentChar = blot.text.substring(offset - 1) // might need to play around with this
-          const revString = reverseString(blot.text)
-          console.log('revString', revString)
-          console.log('current Char', currentChar)
-          // if you're at index 9, and there are 10 - total - position
-          const revIndex = blot.text.length - offset
-          console.log('rev index', revIndex)
+          const secondHalf = blot.text.substring(offset - 1)
+          const firstHalf = blot.text.substring(0, offset - 1)
+
+          const firstSubstr = firstHalf.split(' ').pop()
+          const secondSubstr = secondHalf.split(' ')[0]
+          
+          const word = `${firstSubstr}${secondSubstr}`
+          console.log('word', word)
+
+          // const revIndex = blot.text.length - offset
+          // console.log('rev index', revIndex)
         }}
         modules={
-          { toolbar: '#hidden-toolbar' }
+          { 
+            toolbar: '#hidden-toolbar',
+            keyboard: {
+              bindings: {
+                tab: {
+                  key: 9,
+                  handler: tabHandler
+                }
+              }
+            }
+          }
         }
       />
     </div>
