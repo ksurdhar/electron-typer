@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React from 'react'
 import ReactQuill from 'react-quill'
-// import Quill from 'quill'
+import Quill from 'quill'
+const Delta = Quill.import('delta')
 
 import 'react-quill/dist/quill.snow.css'
 
@@ -13,7 +14,7 @@ class Editor extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      text: '',
+      text: null, // DELTA
       word: '',
       row: 1
     }
@@ -27,12 +28,31 @@ class Editor extends React.Component {
             key: 9,
             handler: (range) => {
               // console.log('hello', range)
-              console.log('test state', this.state)
+              // console.log('test state', this.state)
+              console.log(range)
+              if (this.state.word === '#characters') {
+                console.log('MATCH!')
+                // const newStr = this.state.text.slice().replace(/#characters/, 'Ezra')
+                // console.log(this.state.text)
+                this.quilly.insertText(0, 'ezra') // get the right positioning
+                this.quilly.remove
+
+
+                console.log('new delta', newDelta)
+                this.setState({ text: newDelta })
+                // this.setState({
+                //   text: newStr
+                // })
+              } else {
+                console.log('NO MATCH')
+              }
             }
           }
         }
       }
     }
+
+    this.changeHandler = this.changeHandler.bind(this)
   }
 
   determineWord(range) {
@@ -62,13 +82,39 @@ class Editor extends React.Component {
     })
   }
 
-  render() {
-    const changeHandler = (content, delta, source, editor) => {
-      this.setState({
-        text: content
+  colorLists(range) {
+    if (this.word === '#characters') {
+      const [line, offset] = this.quilly.getLine(range.index)
+      const charactersInRow = line.cache.length
+      const endOfLinePosition = range.index + charactersInRow - offset
+
+      const index = this.line.cache.indexOf(this.word)
+      console.log('INDEX', index)
+
+      // up to current row
+      this.quilly.formatText(0, endOfLinePosition, {
+        'color': 'black'
       })
     }
+  }
 
+  changeHandler(content, delta, source, editor) {
+    console.log('change', editor.getContents())
+    this.setState({
+      text: editor.getContents()
+    })
+  }
+
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   console.log('STATE', this.state)
+  //   console.log('NEXT STATE', nextState)
+  //   if (this.state.text === nextState.text) {
+  //     return false
+  //   }
+  //   return true
+  // }
+
+  render() {
     const keyPressHandler = (event) => {
       // console.log('key press', event.key)
       // get the current index
@@ -81,10 +127,11 @@ class Editor extends React.Component {
       <div>
         <ReactQuill
           ref={this.quillRef}
-          value={this.state.text}
+          defaultValue={this.state.text || ''}
           onKeyPress={keyPressHandler}
-          onChange={changeHandler}
+          onChange={this.changeHandler}
           onChangeSelection={(range, source, editor) => {
+            console.log('selection change')
             const { top } = editor.getBounds(range.index)
             const rowNumber = (top - 14 + ROW_HEIGHT) / ROW_HEIGHT
             // console.log(rowNumber)
@@ -100,9 +147,11 @@ class Editor extends React.Component {
         
             this.colorRows(range)
 
+            this.colorLists(range)
+
             this.setState({
               row: rowNumber,
-              word: this.determineWord(range)
+              word: this.determineWord(range) // figure out start and end indexes
             })
           }}
           modules={this.modules}
