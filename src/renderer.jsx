@@ -2,7 +2,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { css, jsx } from '@emotion/core' 
-import { Editor } from './ui/editor'
+import Editor from './ui/editor'
 import './index.css'
 
 const toolbarStyles = css`
