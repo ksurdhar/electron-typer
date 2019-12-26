@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactQuill from 'react-quill'
 import Quill from 'quill'
-const Delta = Quill.import('delta')
+// const Delta = Quill.import('delta')
 
 import 'react-quill/dist/quill.snow.css'
 
@@ -22,7 +22,7 @@ class Editor extends React.Component {
     super(props)
     this.state = {
       text: null, // DELTA
-      word: {}, // { start: x, end: y}
+      wordPositions: {}, // { start: x, end: y}
       row: 1,
       listIdx: 0,
       activeList: null
@@ -36,27 +36,25 @@ class Editor extends React.Component {
           tab: {
             key: 9,
             handler: (range) => {
-              const { activeList, listIdx } = this.state
-              const wordLength = this.state.word.end - this.state.word.start + 1
-              const currentWord = this.quilly.getText(this.state.word.start, wordLength)
+              const { activeList, listIdx, wordPositions } = this.state
+              const wordLength = wordPositions.end - wordPositions.start + 1
+              const currentWord = this.quilly.getText(wordPositions.start, wordLength)
 
               const idx = activeList && listIdx + 1 <= LISTS[activeList].length - 1 ? listIdx + 1 : 0
               const matchedList = activeList ? LISTS[activeList] : LISTS[currentWord] 
-
+              console.log()
               if (matchedList) {
-                console.log('MATCH!')
-                this.quilly.deleteText(this.state.word.start, wordLength)
-                const newDelta = this.quilly.insertText(this.state.word.start, matchedList[idx])
-                this.quilly.setSelection(this.state.word.start, 0, 'silent') // WARNING
-
-                this.setState({ 
+                this.quilly.deleteText(wordPositions.start, wordLength)
+                const newDelta = this.quilly.insertText(wordPositions.start, matchedList[idx])
+                this.colorListWord(matchedList[idx])
+                this.setState({
                   text: newDelta,
                   listIdx: idx,
                   activeList: activeList ? activeList : currentWord
                 })
 
               } else {
-                console.log('NO MATCH')
+                console.log('NO MATCH IN LISTS')
               }
             }
           }
@@ -65,9 +63,10 @@ class Editor extends React.Component {
     }
 
     this.changeHandler = this.changeHandler.bind(this)
+    this.colorListWord = this.colorListWord.bind(this)
   }
 
-  getWord(range) {
+  getWordString(range) {
     const [blot, offset] = this.quilly.getLeaf(range.index)
     const firstHalf = blot.text ? blot.text.substring(0, offset) : ''
     const secondHalf = blot.text ? blot.text.substring(offset) : ''
@@ -108,18 +107,11 @@ class Editor extends React.Component {
     })
   }
 
-  // colorLists(range) { 
-  //   if (this.word === '#characters') {
-  //     const [line, offset] = this.quilly.getLine(range.index)
-  //     const charactersInRow = line.cache.length
-  //     const endOfLinePosition = range.index + charactersInRow - offset
-
-  //     // up to current row
-  //     this.quilly.formatText(0, endOfLinePosition, {
-  //       'color': 'black'
-  //     })
-  //   }
-  // }
+  colorListWord(wordStr) { 
+    this.quilly.formatText(this.state.wordPositions.start, wordStr.length, {
+      'background': 'red'
+    })
+  }
 
   changeHandler(content, delta, source, editor) {
     this.setState({
@@ -138,11 +130,7 @@ class Editor extends React.Component {
 
   render() {
     const keyPressHandler = (event) => {
-      // console.log('key press', event.key)
-      // get the current index
-      // parse the whole document :(
-      // regex for the word where we are
-      // if the world
+      // placeholder
     }
 
     return (
@@ -168,14 +156,22 @@ class Editor extends React.Component {
         
             this.colorRows(range)
 
-            const word = this.determineWordRange(range)
-            const currentWordInActiveList = LISTS[activeList] && this.getWord(range) === LISTS[activeList][listIdx]
+            const newWordPos = this.determineWordRange(range)
+            const wordString = this.getWordString(range)
+            const currentWordInActiveList = LISTS[activeList] && wordString === LISTS[activeList][listIdx]
+            // console.log('active list', LISTS[activeList])
+            // console.log('word string', this.getWordString(range))
+            // console.log('list match', LISTS[activeList] && LISTS[activeList][listIdx])
             const newListIdx = currentWordInActiveList ? listIdx : 0
             const newActiveList = currentWordInActiveList ? activeList : null
 
+            if (currentWordInActiveList) { // doesnt work while tabbing - only repositioning selection
+              this.colorListWord(wordString)
+            }
+
             this.setState({
               row: rowNumber,
-              word,
+              wordPositions: newWordPos,
               activeList: newActiveList,
               listIdx: newListIdx
             })
