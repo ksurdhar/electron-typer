@@ -27,17 +27,12 @@ class Editor extends React.Component {
           tab: {
             key: 9,
             handler: (range) => {
-              // console.log('hello', range)
               // console.log('test state', this.state)
-              console.log(range)
               if (this.state.word === '#characters') {
                 console.log('MATCH!')
                 // const newStr = this.state.text.slice().replace(/#characters/, 'Ezra')
                 // console.log(this.state.text)
-                this.quilly.insertText(0, 'ezra') // get the right positioning
-                this.quilly.remove
-
-
+                const newDelta = this.quilly.insertText(0, 'ezra')
                 console.log('new delta', newDelta)
                 this.setState({ text: newDelta })
                 // this.setState({
@@ -57,12 +52,17 @@ class Editor extends React.Component {
 
   determineWord(range) {
     const [blot, offset] = this.quilly.getLeaf(range.index)
-
-    const secondHalf = blot.text ? blot.text.substring(offset - 1) : ''
-    const firstHalf = blot.text ? blot.text.substring(0, offset - 1) : ''
+    // console.log(range, blot, offset)
+    const secondHalf = blot.text ? blot.text.substring(offset) : ''
+    const firstHalf = blot.text ? blot.text.substring(0, offset) : ''
 
     const firstSubstr = firstHalf.split(' ').pop()
     const secondSubstr = secondHalf.split(' ')[0]
+
+    const word = `${firstSubstr}${secondSubstr}` //.trim()
+    console.log('word', word)
+
+    console.log('word index', blot.text.indexOf(word))
 
     return `${firstSubstr}${secondSubstr}`
   }
@@ -89,7 +89,7 @@ class Editor extends React.Component {
       const endOfLinePosition = range.index + charactersInRow - offset
 
       const index = this.line.cache.indexOf(this.word)
-      console.log('INDEX', index)
+      // console.log('INDEX', index)
 
       // up to current row
       this.quilly.formatText(0, endOfLinePosition, {
@@ -99,7 +99,7 @@ class Editor extends React.Component {
   }
 
   changeHandler(content, delta, source, editor) {
-    console.log('change', editor.getContents())
+    // console.log('change', editor.getContents())
     this.setState({
       text: editor.getContents()
     })
@@ -131,7 +131,7 @@ class Editor extends React.Component {
           onKeyPress={keyPressHandler}
           onChange={this.changeHandler}
           onChangeSelection={(range, source, editor) => {
-            console.log('selection change')
+            // console.log('selection change')
             const { top } = editor.getBounds(range.index)
             const rowNumber = (top - 14 + ROW_HEIGHT) / ROW_HEIGHT
             // console.log(rowNumber)
@@ -151,7 +151,7 @@ class Editor extends React.Component {
 
             this.setState({
               row: rowNumber,
-              word: this.determineWord(range) // figure out start and end indexes
+              word: this.determineWord(range)
             })
           }}
           modules={this.modules}
