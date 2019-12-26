@@ -15,7 +15,7 @@ class Editor extends React.Component {
     super(props)
     this.state = {
       text: null, // DELTA
-      word: '',
+      word: {}, // { start: x, end: y}
       row: 1
     }
     this.quillRef = React.createRef()
@@ -28,19 +28,22 @@ class Editor extends React.Component {
             key: 9,
             handler: (range) => {
               // console.log('test state', this.state)
-              if (this.state.word === '#characters') {
-                console.log('MATCH!')
-                // const newStr = this.state.text.slice().replace(/#characters/, 'Ezra')
-                // console.log(this.state.text)
-                const newDelta = this.quilly.insertText(0, 'ezra')
-                console.log('new delta', newDelta)
-                this.setState({ text: newDelta })
-                // this.setState({
-                //   text: newStr
-                // })
-              } else {
-                console.log('NO MATCH')
-              }
+              const wordLength = this.state.word.end - this.state.word.start + 1
+              console.log('WORD LENGTH', wordLength)
+              this.quilly.setSelection(this.state.word.start, wordLength)
+              // if (this.state.word === '#characters') {
+              //   console.log('MATCH!')
+              //   // const newStr = this.state.text.slice().replace(/#characters/, 'Ezra')
+              //   // console.log(this.state.text)
+              //   const newDelta = this.quilly.insertText(0, 'ezra')
+              //   console.log('new delta', newDelta)
+              //   this.setState({ text: newDelta })
+              //   // this.setState({
+              //   //   text: newStr
+              //   // })
+              // } else {
+              //   console.log('NO MATCH')
+              // }
             }
           }
         }
@@ -52,7 +55,7 @@ class Editor extends React.Component {
 
   determineWord(range) {
     const [blot, offset] = this.quilly.getLeaf(range.index)
-    // console.log(range, blot, offset)
+    console.log(range, offset)
     const firstHalf = blot.text ? blot.text.substring(0, offset) : ''
     const secondHalf = blot.text ? blot.text.substring(offset) : ''
     
@@ -60,10 +63,9 @@ class Editor extends React.Component {
     const firstOffset = firstHalfRev.indexOf(' ')
     const firstSpacePos = firstOffset === -1 ? 0 : offset - firstOffset
 
-    const secondOffset = secondHalf.indexOf(' ') > -1 ? secondHalf.indexOf(' ') : secondHalf.length - 1
-    const secondSpacePos = offset + secondOffset
-
-    
+    const secondOffset = secondHalf.indexOf(' ') > -1 ? secondHalf.indexOf(' ') : secondHalf.length
+    const secondSpacePos = offset + secondOffset - 1
+  
     const firstSubstr = firstHalf.split(' ').pop()
     const secondSubstr = secondHalf.split(' ')[0]
 
@@ -71,10 +73,13 @@ class Editor extends React.Component {
 
     // console.log(firstHalf, '|', secondHalf)
     console.log(firstSpacePos, secondSpacePos)
-    console.log('word', word)
-    console.log('word index', blot.text.indexOf(word))
 
-    return `${firstSubstr}${secondSubstr}`
+    const indexOffset = range.index - offset
+    // console.log('word', word)
+    // console.log('word index', blot.text.indexOf(word))
+
+    // return `${firstSubstr}${secondSubstr}`
+    return { start: firstSpacePos + indexOffset, end: secondSpacePos + indexOffset }
   }
 
   colorRows(range) {
@@ -92,21 +97,18 @@ class Editor extends React.Component {
     })
   }
 
-  colorLists(range) {
-    if (this.word === '#characters') {
-      const [line, offset] = this.quilly.getLine(range.index)
-      const charactersInRow = line.cache.length
-      const endOfLinePosition = range.index + charactersInRow - offset
+  // colorLists(range) { 
+  //   if (this.word === '#characters') {
+  //     const [line, offset] = this.quilly.getLine(range.index)
+  //     const charactersInRow = line.cache.length
+  //     const endOfLinePosition = range.index + charactersInRow - offset
 
-      const index = this.line.cache.indexOf(this.word)
-      // console.log('INDEX', index)
-
-      // up to current row
-      this.quilly.formatText(0, endOfLinePosition, {
-        'color': 'black'
-      })
-    }
-  }
+  //     // up to current row
+  //     this.quilly.formatText(0, endOfLinePosition, {
+  //       'color': 'black'
+  //     })
+  //   }
+  // }
 
   changeHandler(content, delta, source, editor) {
     // console.log('change', editor.getContents())
@@ -157,7 +159,7 @@ class Editor extends React.Component {
         
             this.colorRows(range)
 
-            this.colorLists(range)
+            // this.colorLists(range)
 
             this.setState({
               row: rowNumber,
