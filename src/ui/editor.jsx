@@ -7,6 +7,13 @@ import 'react-quill/dist/quill.snow.css'
 
 const ROW_HEIGHT = 18 // hardcoded. would be better if dynamic
 
+const LISTS = {
+  '#characters': ['Ezra', 'Lautreque', 'Kyhia'],
+  '#locations': ['Orach', 'Gomyr', 'Glitterrun']
+}
+
+const listKeys = Object.keys(LISTS)
+
 // const editorHeight = wrapperRef.current.clientHeight - 26 // removes padding
 // const totalRows = editorHeight / ROW_HEIGHT
 
@@ -16,7 +23,9 @@ class Editor extends React.Component {
     this.state = {
       text: null, // DELTA
       word: {}, // { start: x, end: y}
-      row: 1
+      row: 1,
+      listIdx: 0,
+      activeList: null
     }
     this.quillRef = React.createRef()
     this.quilly = null
@@ -27,23 +36,28 @@ class Editor extends React.Component {
           tab: {
             key: 9,
             handler: (range) => {
-              // console.log('test state', this.state)
+              const { activeList, listIdx } = this.state
               const wordLength = this.state.word.end - this.state.word.start + 1
-              console.log('WORD LENGTH', wordLength)
-              this.quilly.setSelection(this.state.word.start, wordLength)
-              // if (this.state.word === '#characters') {
-              //   console.log('MATCH!')
-              //   // const newStr = this.state.text.slice().replace(/#characters/, 'Ezra')
-              //   // console.log(this.state.text)
-              //   const newDelta = this.quilly.insertText(0, 'ezra')
-              //   console.log('new delta', newDelta)
-              //   this.setState({ text: newDelta })
-              //   // this.setState({
-              //   //   text: newStr
-              //   // })
-              // } else {
-              //   console.log('NO MATCH')
-              // }
+              const currentWord = this.quilly.getText(this.state.word.start, wordLength)
+
+              const idx = activeList && listIdx + 1 <= LISTS[activeList].length - 1 ? listIdx + 1 : 0
+              const matchedList = activeList ? LISTS[activeList] : LISTS[currentWord] 
+
+              if (matchedList) {
+                console.log('MATCH!')
+                this.quilly.deleteText(this.state.word.start, wordLength)
+                const newDelta = this.quilly.insertText(this.state.word.start, matchedList[idx])
+                this.quilly.setSelection(this.state.word.start, 0, 'silent') // WARNING
+
+                this.setState({ 
+                  text: newDelta,
+                  listIdx: idx,
+                  activeList: activeList ? activeList : currentWord
+                })
+
+              } else {
+                console.log('NO MATCH')
+              }
             }
           }
         }
@@ -53,9 +67,17 @@ class Editor extends React.Component {
     this.changeHandler = this.changeHandler.bind(this)
   }
 
-  determineWord(range) {
+  getWord(range) {
     const [blot, offset] = this.quilly.getLeaf(range.index)
-    console.log(range, offset)
+    const firstHalf = blot.text ? blot.text.substring(0, offset) : ''
+    const secondHalf = blot.text ? blot.text.substring(offset) : ''
+    const firstSubstr = firstHalf.split(' ').pop()
+    const secondSubstr = secondHalf.split(' ')[0]
+    return `${firstSubstr}${secondSubstr}`
+  }
+
+  determineWordRange(range) {
+    const [blot, offset] = this.quilly.getLeaf(range.index)
     const firstHalf = blot.text ? blot.text.substring(0, offset) : ''
     const secondHalf = blot.text ? blot.text.substring(offset) : ''
     
@@ -66,19 +88,8 @@ class Editor extends React.Component {
     const secondOffset = secondHalf.indexOf(' ') > -1 ? secondHalf.indexOf(' ') : secondHalf.length
     const secondSpacePos = offset + secondOffset - 1
   
-    const firstSubstr = firstHalf.split(' ').pop()
-    const secondSubstr = secondHalf.split(' ')[0]
-
-    const word = `${firstSubstr}${secondSubstr}`
-
-    // console.log(firstHalf, '|', secondHalf)
-    console.log(firstSpacePos, secondSpacePos)
-
+    // console.log(firstSpacePos, secondSpacePos)
     const indexOffset = range.index - offset
-    // console.log('word', word)
-    // console.log('word index', blot.text.indexOf(word))
-
-    // return `${firstSubstr}${secondSubstr}`
     return { start: firstSpacePos + indexOffset, end: secondSpacePos + indexOffset }
   }
 
@@ -111,7 +122,6 @@ class Editor extends React.Component {
   // }
 
   changeHandler(content, delta, source, editor) {
-    // console.log('change', editor.getContents())
     this.setState({
       text: editor.getContents()
     })
@@ -143,11 +153,10 @@ class Editor extends React.Component {
           onKeyPress={keyPressHandler}
           onChange={this.changeHandler}
           onChangeSelection={(range, source, editor) => {
-            // console.log('selection change')
+            const { row, activeList, listIdx } = this.state
             const { top } = editor.getBounds(range.index)
             const rowNumber = (top - 14 + ROW_HEIGHT) / ROW_HEIGHT
-            // console.log(rowNumber)
-            if (this.state.row !== rowNumber) {
+            if (row !== rowNumber) {
               setTimeout(() => {
                 window.scrollTo({ top: top - 14, behavior: 'smooth' })
               }, 200)
@@ -159,11 +168,16 @@ class Editor extends React.Component {
         
             this.colorRows(range)
 
-            // this.colorLists(range)
+            const word = this.determineWordRange(range)
+            const currentWordInActiveList = LISTS[activeList] && this.getWord(range) === LISTS[activeList][listIdx]
+            const newListIdx = currentWordInActiveList ? listIdx : 0
+            const newActiveList = currentWordInActiveList ? activeList : null
 
             this.setState({
               row: rowNumber,
-              word: this.determineWord(range)
+              word,
+              activeList: newActiveList,
+              listIdx: newListIdx
             })
           }}
           modules={this.modules}
