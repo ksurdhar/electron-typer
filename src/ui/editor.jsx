@@ -53,15 +53,25 @@ class Editor extends React.Component {
   determineWord(range) {
     const [blot, offset] = this.quilly.getLeaf(range.index)
     // console.log(range, blot, offset)
-    const secondHalf = blot.text ? blot.text.substring(offset) : ''
     const firstHalf = blot.text ? blot.text.substring(0, offset) : ''
+    const secondHalf = blot.text ? blot.text.substring(offset) : ''
+    
+    const firstHalfRev = firstHalf.split('').reverse().join('')
+    const firstOffset = firstHalfRev.indexOf(' ')
+    const firstSpacePos = firstOffset === -1 ? 0 : offset - firstOffset
 
+    const secondOffset = secondHalf.indexOf(' ') > -1 ? secondHalf.indexOf(' ') : secondHalf.length - 1
+    const secondSpacePos = offset + secondOffset
+
+    
     const firstSubstr = firstHalf.split(' ').pop()
     const secondSubstr = secondHalf.split(' ')[0]
 
-    const word = `${firstSubstr}${secondSubstr}` //.trim()
-    console.log('word', word)
+    const word = `${firstSubstr}${secondSubstr}`
 
+    // console.log(firstHalf, '|', secondHalf)
+    console.log(firstSpacePos, secondSpacePos)
+    console.log('word', word)
     console.log('word index', blot.text.indexOf(word))
 
     return `${firstSubstr}${secondSubstr}`
