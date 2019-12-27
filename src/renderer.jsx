@@ -31,8 +31,15 @@ const mainCss = css`
   justify-content: space-around;
 `
 
+const lists = { // want to set in state, eventually redux or something
+  '#characters': ['Ezra', 'Lautreque', 'Kyhia'],
+  '#locations': ['Orach', 'Gomyr', 'Glitterrun']
+}
+
 const App = () => {
   const [ listOpen, setListOpen ] = useState(false)
+  const [ lists, setLists ] = useState(lists)
+
   let containerRef = React.createRef()
   const getContainer = () => {
     return containerRef
@@ -44,6 +51,10 @@ const App = () => {
   const closeList = () => {
     setListOpen(false)
   }
+  const modifyLists = (contents) => {
+    // take the first line, set as key, take each other line and 
+    // setLists()
+  }
 
   console.log('list open', listOpen)
   return (
@@ -51,9 +62,9 @@ const App = () => {
       <div id='top-spacer' css={topSpacerCss}/>
       <div id='hidden-toolbar' css={toolbarStyles} />
       <div css={mainCss}>
-        <Editor getContainer={getContainer} />
+        <Editor getContainer={getContainer} lists={lists}/>
         {!listOpen && <Toolbar openList={openList}/> }
-        { listOpen && <Sublists closeList={closeList}/> }
+        { listOpen && <Sublists closeList={closeList} modifyLists={modifyLists} lists={lists}/> }
       </div>
       <div id='bottom-spacer' css={bottomSpacerCss}/>
     </div>

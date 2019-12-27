@@ -8,11 +8,6 @@ import 'react-quill/dist/quill.snow.css'
 
 const ROW_HEIGHT = 18 // hardcoded. would be better if dynamic
 
-const LISTS = {
-  '#characters': ['Ezra', 'Lautreque', 'Kyhia'],
-  '#locations': ['Orach', 'Gomyr', 'Glitterrun']
-}
-
 // const editorHeight = wrapperRef.current.clientHeight - 26 // removes padding
 // const totalRows = editorHeight / ROW_HEIGHT
 
@@ -43,8 +38,8 @@ class Editor extends React.Component {
               const wordLength = wordPositions.end - wordPositions.start + 1
               const currentWord = this.quilly.getText(wordPositions.start, wordLength)
 
-              const idx = activeList && listIdx + 1 <= LISTS[activeList].length - 1 ? listIdx + 1 : 0
-              const matchedList = activeList ? LISTS[activeList] : LISTS[currentWord] 
+              const idx = activeList && listIdx + 1 <= props.lists[activeList].length - 1 ? listIdx + 1 : 0
+              const matchedList = activeList ? props.lists[activeList] : props.lists[currentWord] 
               console.log()
               if (matchedList) {
                 this.quilly.deleteText(wordPositions.start, wordLength)
@@ -161,7 +156,7 @@ class Editor extends React.Component {
 
             const newWordPos = this.determineWordRange(range)
             const wordString = this.getWordString(range)
-            const currentWordInActiveList = LISTS[activeList] && wordString === LISTS[activeList][listIdx]
+            const currentWordInActiveList = this.props.lists[activeList] && wordString === this.props.lists[activeList][listIdx]
             // console.log('active list', LISTS[activeList])
             console.log('word string', this.getWordString(range))
             // console.log('list match', LISTS[activeList] && LISTS[activeList][listIdx])
