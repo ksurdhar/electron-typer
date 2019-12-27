@@ -1,7 +1,8 @@
+/** @jsx jsx */
 import React from 'react'
 import ReactQuill from 'react-quill'
-import Quill from 'quill'
 // const Delta = Quill.import('delta')
+import { css, jsx } from '@emotion/core'
 
 import 'react-quill/dist/quill.snow.css'
 
@@ -12,10 +13,12 @@ const LISTS = {
   '#locations': ['Orach', 'Gomyr', 'Glitterrun']
 }
 
-const listKeys = Object.keys(LISTS)
-
 // const editorHeight = wrapperRef.current.clientHeight - 26 // removes padding
 // const totalRows = editorHeight / ROW_HEIGHT
+
+const containerCss = css`
+  width: 90%;
+`
 
 class Editor extends React.Component {
   constructor(props) {
@@ -108,9 +111,9 @@ class Editor extends React.Component {
   }
 
   colorListWord(wordStr) { 
-    this.quilly.formatText(this.state.wordPositions.start, wordStr.length, {
-      'background': 'red'
-    })
+    // this.quilly.formatText(this.state.wordPositions.start, wordStr.length, {
+    //   'background': 'red'
+    // })
   }
 
   changeHandler(content, delta, source, editor) {
@@ -132,9 +135,9 @@ class Editor extends React.Component {
     const keyPressHandler = (event) => {
       // placeholder
     }
-
+    console.log(this.state.text)
     return (
-      <div>
+      <div css={containerCss}>
         <ReactQuill
           ref={this.quillRef}
           defaultValue={this.state.text || ''}
@@ -160,7 +163,7 @@ class Editor extends React.Component {
             const wordString = this.getWordString(range)
             const currentWordInActiveList = LISTS[activeList] && wordString === LISTS[activeList][listIdx]
             // console.log('active list', LISTS[activeList])
-            // console.log('word string', this.getWordString(range))
+            console.log('word string', this.getWordString(range))
             // console.log('list match', LISTS[activeList] && LISTS[activeList][listIdx])
             const newListIdx = currentWordInActiveList ? listIdx : 0
             const newActiveList = currentWordInActiveList ? activeList : null
