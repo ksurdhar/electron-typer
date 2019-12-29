@@ -54,16 +54,18 @@ const App = () => {
 
   const modifyLists = (activeList, delta) => {
     const listEntries = delta.reduce((acc, op) => {
-      return acc.concat(op.insert.split('\n').filter((val) => val.length > 0))
+      return acc.concat(op.insert.split('\n').filter((val) => val.length > 0).map((val) => val.trim().replace(/\s+/g, '-')))
     }, [])
 
+    const firstEntry = listEntries[0].startsWith('#') ? listEntries[0] : `#${listEntries[0]}`
+
+    const key = !!lists[`${activeList}`] ? `${activeList}` : firstEntry
     const newLists = Object.assign({}, lists)
-    newLists[`${activeList}`] = listEntries.slice(1)
+    newLists[key] = listEntries.slice(1)
 
     setLists(newLists)
   }
 
-  console.log('list open', listOpen)
   return (
     <div css={containerCss} ref={containerRef}>
       <div id='top-spacer' css={topSpacerCss}/>

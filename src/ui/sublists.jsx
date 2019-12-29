@@ -37,16 +37,18 @@ class Sublists extends React.Component {
   }
 
   openList(listName) {
-    const delta = [
-      {insert: listName, attributes: { bold: true }},
-      { insert: '\n' },
-    ].concat(this.props.lists[listName].reduce((acc, current) => {
+    const lines = this.props.lists[listName] ? this.props.lists[listName].reduce((acc, current) => {
       return acc.concat([
         { insert: current },
         { insert: '\n' },
       ])
-    }, []))
+    }, []) : [{ insert: '' }]
 
+    const delta = [
+      { insert: listName, attributes: { bold: true } },
+      { insert: '\n' },
+    ].concat(lines)
+    console.log('listname', listName)
     this.setState({
       activeList: listName, 
       text: new Delta(delta)
@@ -67,7 +69,7 @@ class Sublists extends React.Component {
     return (
       <div>
         { listButtons }
-        <button>Create List</button>
+        <button onClick={() => this.openList(' ')}>Create List</button>
       </div>
     )
   }
