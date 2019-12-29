@@ -51,10 +51,16 @@ const App = () => {
   const closeList = () => {
     setListOpen(false)
   }
-  const modifyLists = (contents) => {
-    console.log('modifying lists!', contents)
-    // take the first line, set as key, take each other line and 
-    // setLists()
+
+  const modifyLists = (activeList, delta) => {
+    const listEntries = delta.reduce((acc, op) => {
+      return acc.concat(op.insert.split('\n').filter((val) => val.length > 0))
+    }, [])
+
+    const newLists = Object.assign({}, lists)
+    newLists[`${activeList}`] = listEntries.slice(1)
+
+    setLists(newLists)
   }
 
   console.log('list open', listOpen)

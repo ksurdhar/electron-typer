@@ -34,17 +34,18 @@ class Sublists extends React.Component {
     this.setState({
       text: editor.getContents()
     })
-    // console.log('change! value:', text)
-    // this.props.modifyList(text)
   }
 
   openList(listName) {
-    const delta = this.props.lists[listName].reduce((acc, current, idx) => {
+    const delta = [
+      {insert: listName, attributes: { bold: true }},
+      { insert: '\n' },
+    ].concat(this.props.lists[listName].reduce((acc, current) => {
       return acc.concat([
-        { insert: current, attributes: { bold: idx === 0 ? true : false } },
+        { insert: current },
         { insert: '\n' },
       ])
-    }, [])
+    }, []))
 
     this.setState({
       activeList: listName, 
@@ -72,7 +73,7 @@ class Sublists extends React.Component {
   }
 
   blurHandler() {
-    this.props.modifyLists(this.state.text)
+    this.props.modifyLists(this.state.activeList, this.state.text)
     this.setState({
       activeList: null, // closes list
     })
@@ -89,7 +90,6 @@ class Sublists extends React.Component {
 
   render() {
     const { activeList, text } = this.state
-    console.log('text', text)
     return (
       <div css={containerCss} onBlur={this.blurHandler}>
         { activeList && <ReactQuill

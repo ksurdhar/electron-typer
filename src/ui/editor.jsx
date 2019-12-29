@@ -35,11 +35,12 @@ class Editor extends React.Component {
             key: 9,
             handler: (range) => {
               const { activeList, listIdx, wordPositions } = this.state
+              const { lists } = this.props
               const wordLength = wordPositions.end - wordPositions.start + 1
               const currentWord = this.quilly.getText(wordPositions.start, wordLength)
 
-              const idx = activeList && listIdx + 1 <= props.lists[activeList].length - 1 ? listIdx + 1 : 0
-              const matchedList = activeList ? props.lists[activeList] : props.lists[currentWord] 
+              const idx = activeList && listIdx + 1 <= lists[activeList].length - 1 ? listIdx + 1 : 0
+              const matchedList = activeList ? lists[activeList] : lists[currentWord] 
               console.log()
               if (matchedList) {
                 this.quilly.deleteText(wordPositions.start, wordLength)
