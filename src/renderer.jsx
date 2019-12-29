@@ -31,14 +31,14 @@ const mainCss = css`
   justify-content: space-around;
 `
 
-const lists = { // want to set in state, eventually redux or something
+const LISTS = { // want to set in state, eventually redux or something
   '#characters': ['Ezra', 'Lautreque', 'Kyhia'],
   '#locations': ['Orach', 'Gomyr', 'Glitterrun']
 }
 
 const App = () => {
   const [ listOpen, setListOpen ] = useState(false)
-  const [ lists, setLists ] = useState(lists)
+  const [ lists, setLists ] = useState(LISTS)
 
   let containerRef = React.createRef()
   const getContainer = () => {
@@ -52,6 +52,7 @@ const App = () => {
     setListOpen(false)
   }
   const modifyLists = (contents) => {
+    console.log('modifying lists!', contents)
     // take the first line, set as key, take each other line and 
     // setLists()
   }
