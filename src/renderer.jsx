@@ -43,7 +43,7 @@ const App = () => {
   const [ modalOpen, setModalOpen] = useState(false)
   const [ listOpen, setListOpen ] = useState(false)
   const [ lists, setLists ] = useState(LISTS)
-  const [ projects, setProjects ] = useState(PROJECTS)
+  const [ projects, setProjects ] = useState([])
 
   let containerRef = React.createRef()
   const getContainer = () => {
@@ -62,6 +62,10 @@ const App = () => {
   }
   const closeModal = () => {
     setModalOpen(false)
+  }
+
+  const updateProjects = (projects) => {
+    setProjects(projects)
   }
 
   const modifyLists = (activeList, delta) => {
@@ -88,7 +92,12 @@ const App = () => {
         { listOpen && <Sublists closeList={closeList} modifyLists={modifyLists} lists={lists}/> }
       </div>
       <div id='bottom-spacer' css={bottomSpacerCss}/>
-      <ProjectModal modalOpen={modalOpen} closeModal={closeModal} projects={projects}/>
+      <ProjectModal 
+        modalOpen={modalOpen} 
+        closeModal={closeModal} 
+        projects={projects} 
+        updateProjects={updateProjects}
+      />
     </div>
   )
 }
