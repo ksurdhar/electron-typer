@@ -22,6 +22,9 @@ class Toolbar extends React.Component {
         <button onClick={this.props.openList} css={listButtonCss}>
           <span>+</span>
         </button>
+        <button onClick={this.props.openModal} css={listButtonCss}>
+          <span>p</span>
+        </button>
       </>
     )
   }

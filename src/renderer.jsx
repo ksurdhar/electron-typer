@@ -5,6 +5,7 @@ import { css, jsx } from '@emotion/core'
 import Editor from './ui/editor'
 import Toolbar from './ui/toolbar'
 import Sublists from './ui/sublists'
+import ProjectModal from './ui/projectModal'
 
 import './index.css'
 
@@ -36,9 +37,13 @@ const LISTS = { // want to set in state, eventually redux or something
   '#locations': ['Orach', 'Gomyr', 'Glitterrun']
 }
 
+const PROJECTS = ['project1']
+
 const App = () => {
+  const [ modalOpen, setModalOpen] = useState(false)
   const [ listOpen, setListOpen ] = useState(false)
   const [ lists, setLists ] = useState(LISTS)
+  const [ projects, setProjects ] = useState(PROJECTS)
 
   let containerRef = React.createRef()
   const getContainer = () => {
@@ -50,6 +55,13 @@ const App = () => {
   }
   const closeList = () => {
     setListOpen(false)
+  }
+
+  const openModal = () => {
+    setModalOpen(true)
+  }
+  const closeModal = () => {
+    setModalOpen(false)
   }
 
   const modifyLists = (activeList, delta) => {
@@ -72,10 +84,11 @@ const App = () => {
       <div id='hidden-toolbar' css={toolbarStyles} />
       <div css={mainCss}>
         <Editor getContainer={getContainer} lists={lists}/>
-        {!listOpen && <Toolbar openList={openList}/> }
+        {!listOpen && <Toolbar openList={openList} openModal={openModal}/> }
         { listOpen && <Sublists closeList={closeList} modifyLists={modifyLists} lists={lists}/> }
       </div>
       <div id='bottom-spacer' css={bottomSpacerCss}/>
+      <ProjectModal modalOpen={modalOpen} closeModal={closeModal} projects={projects}/>
     </div>
   )
 }
