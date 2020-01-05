@@ -9,6 +9,7 @@ import {
   INITIATE_SAVE,
   INITIATE_NEW_FILE,
 } from '../actions/types'
+import { generateId } from './generateId'
 
 import 'react-quill/dist/quill.snow.css'
 
@@ -29,7 +30,10 @@ class Editor extends React.Component {
       wordPositions: {}, // { start: x, end: y}
       row: 1,
       listIdx: 0,
-      activeList: null
+      activeList: null,
+      name: null,
+      id: null,
+      project: null,
     }
     this.quillRef = React.createRef()
     this.quilly = null
@@ -71,17 +75,22 @@ class Editor extends React.Component {
 
     ipcRenderer.on(OPEN_DOCUMENT, (event, data) => { // when saved show notification on screen
       console.log('opening document', data)
-      this.quilly.setContents(data)
-      this.setState({ text: data })
+      const { text, id } = data
+      this.quilly.setContents(text)
+      this.setState({ text, id })
     })
 
     ipcRenderer.on(INITIATE_SAVE, (event, data) => {
       console.log('initiate save', data)
-      ipcRenderer.send(RENDERER_SENDING_SAVE_DATA, this.state.text, data.saveAs)
+      ipcRenderer.send(RENDERER_SENDING_SAVE_DATA, {
+        text: this.state.text,
+        id: this.state.id ? this.state.id : generateId()
+      }, data.saveAs)
     })
 
     ipcRenderer.on(INITIATE_NEW_FILE, (event, data) => {
       console.log('initiate new file', data)
+      // clear out information
       // textArea.value = ''
     })
   }

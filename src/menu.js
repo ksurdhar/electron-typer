@@ -1,10 +1,12 @@
 const { app, Menu, dialog, ipcMain } = require('electron')
+const settings = require('electron-settings')
 const path = require('path')
 const {
   OPEN_DOCUMENT,
   INITIATE_SAVE,
   INITIATE_NEW_FILE,
-  RENDERER_SENDING_SAVE_DATA
+  RENDERER_SENDING_SAVE_DATA,
+  RENDERER_SETTING_PROJECT
 } = require(path.resolve('./src/actions/types.js'))
 
 var fs = require('fs')
@@ -22,7 +24,13 @@ module.exports = function (window) {
     })
   }
 
+  ipcMain.on(RENDERER_SETTING_PROJECT, async (event, data, saveAs) => {
+    console.log('renderer set project', data)
+    // settings.set()
+  })
+
   ipcMain.on(RENDERER_SENDING_SAVE_DATA, async (event, data, saveAs) => {
+    console.log('received data', data)
     if (currentFilePath && saveAs === false) {
       fs.writeFile(currentFilePath, JSON.stringify(data), (err, data) => {
         if (err) return console.log(err)

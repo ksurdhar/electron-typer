@@ -1,8 +1,9 @@
 /** @jsx jsx */
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { css, jsx } from '@emotion/core'
 import Modal from 'react-modal'
 import Creatable from 'react-select/creatable'
+import { RENDERER_SETTING_PROJECT } from '../actions/types'
 
 Modal.setAppElement('#root')
 
@@ -34,7 +35,13 @@ const ProjectModal = (props) => {
 
   const addProject = (project) => {
     updateProjects(projects.concat([project]))
-    setSelectedOpt({value: project, label: project  })
+    setSelectedOpt({ value: project, label: project })
+  }
+
+  const okHandler = () => {
+    console.log('ok clicked, sending', selectedOpt.value)
+    ipcRenderer.send(RENDERER_SETTING_PROJECT, selectedOpt.value)
+    this.props.closeModal()
   }
 
   const placeholder = projects.length > 0 ? 'Select' : 'Type Project Name'
@@ -54,6 +61,8 @@ const ProjectModal = (props) => {
           onCreateOption={addProject} 
           options={options}
         />
+        <button onClick={okHandler}>Ok</button>
+        <button onClick={this.props.closeModal}>Cancel</button>
       </div>
     </Modal>
   )
