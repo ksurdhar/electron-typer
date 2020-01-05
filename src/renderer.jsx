@@ -1,11 +1,17 @@
 /** @jsx jsx */
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import ReactDOM from 'react-dom'
 import { css, jsx } from '@emotion/core' 
 import Editor from './ui/editor'
 import Toolbar from './ui/toolbar'
 import Sublists from './ui/sublists'
 import ProjectModal from './ui/projectModal'
+import {
+  OPEN_DOCUMENT,
+  RENDERER_SENDING_SAVE_DATA,
+  INITIATE_SAVE,
+  INITIATE_NEW_FILE,
+} from './actions/types'
 
 import './index.css'
 
@@ -40,10 +46,33 @@ const LISTS = { // want to set in state, eventually redux or something
 const PROJECTS = ['project1']
 
 const App = () => {
+  const [ ipcSubscribed, setIpcSubscribed ] = useState(false)
   const [ modalOpen, setModalOpen] = useState(false)
   const [ listOpen, setListOpen ] = useState(false)
   const [ lists, setLists ] = useState(LISTS)
   const [ projects, setProjects ] = useState([])
+
+  useEffect(() => {
+    if (!ipcSubscribed) {
+      ipcRenderer.on(OPEN_DOCUMENT, (event, data) => { // when saved show notification on screen
+        console.log('opening document')
+        // textArea.value = data
+      })
+
+      ipcRenderer.on(INITIATE_SAVE, (event, data) => {
+        console.log('initiate save')
+        // ipcRenderer.send(RENDERER_SENDING_SAVE_DATA, textArea.value, data.saveAs)
+      })
+
+      ipcRenderer.on(INITIATE_NEW_FILE, (event, data) => {
+        console.log('initiate save file')
+        // textArea.value = ''
+        // textArea.setSelectionRange(0, 0)
+        // setTimeout(resize, 1)
+      })
+      setIpcSubscribed(true)
+    }
+  }, [ipcSubscribed])
 
   let containerRef = React.createRef()
   const getContainer = () => {
