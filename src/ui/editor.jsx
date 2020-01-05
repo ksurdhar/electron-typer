@@ -3,14 +3,6 @@ import React from 'react'
 import ReactQuill from 'react-quill'
 // const Delta = Quill.import('delta')
 import { css, jsx } from '@emotion/core'
-import {
-  OPEN_DOCUMENT,
-  RENDERER_SENDING_SAVE_DATA,
-  INITIATE_SAVE,
-  INITIATE_NEW_FILE,
-} from '../actions/types'
-import { generateId } from './generateId'
-
 import 'react-quill/dist/quill.snow.css'
 
 const ROW_HEIGHT = 18 // hardcoded. would be better if dynamic
@@ -26,13 +18,11 @@ class Editor extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      text: null, // DELTA
       wordPositions: {}, // { start: x, end: y}
       row: 1,
       listIdx: 0,
       activeList: null,
       name: null,
-      id: null,
       project: null,
     }
     this.quillRef = React.createRef()
@@ -56,10 +46,10 @@ class Editor extends React.Component {
                 const newDelta = this.quilly.insertText(wordPositions.start, matchedList[idx])
                 this.colorListWord(matchedList[idx])
                 this.setState({
-                  text: newDelta,
                   listIdx: idx,
                   activeList: activeList ? activeList : currentWord
                 })
+                this.props.setText(newDelta)
 
               } else {
                 console.log('NO MATCH IN LISTS')
@@ -72,31 +62,17 @@ class Editor extends React.Component {
 
     this.changeHandler = this.changeHandler.bind(this)
     this.colorListWord = this.colorListWord.bind(this)
-
-    ipcRenderer.on(OPEN_DOCUMENT, (event, data) => { // when saved show notification on screen
-      console.log('opening document', data)
-      const { text, id } = data
-      this.quilly.setContents(text)
-      this.setState({ text, id })
-    })
-
-    ipcRenderer.on(INITIATE_SAVE, (event, data) => {
-      console.log('initiate save', data)
-      ipcRenderer.send(RENDERER_SENDING_SAVE_DATA, {
-        text: this.state.text,
-        id: this.state.id ? this.state.id : generateId()
-      }, data.saveAs)
-    })
-
-    ipcRenderer.on(INITIATE_NEW_FILE, (event, data) => {
-      console.log('initiate new file', data)
-      // clear out information
-      // textArea.value = ''
-    })
   }
 
   componentDidMount() {
     this.quilly = this.quillRef.current.getEditor()
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.id && this.props.id !== prevProps) {
+      console.log('id was updated, file was opened')
+      this.quilly.setContents(this.props.text) // needs a reference
+    }
   }
 
   getWordString(range) {
@@ -147,9 +123,8 @@ class Editor extends React.Component {
   }
 
   changeHandler(content, delta, source, editor) {
-    this.setState({
-      text: editor.getContents()
-    })
+    console.log('change!', editor.getContents())
+    this.props.setText(editor.getContents())
   }
 
   render() {
@@ -161,7 +136,7 @@ class Editor extends React.Component {
       <div css={containerCss}>
         <ReactQuill
           ref={this.quillRef}
-          defaultValue={this.state.text || ''}
+          defaultValue={this.props.text || ''}
           onKeyPress={keyPressHandler}
           onChange={this.changeHandler}
           onChangeSelection={(range, source, editor) => {

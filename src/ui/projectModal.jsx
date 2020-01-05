@@ -25,7 +25,7 @@ const containerCss = css`
 
 const ProjectModal = (props) => {
   const [ selectedOpt, setSelectedOpt ] = useState()
-  const { modalOpen, closeModal, projects, updateProjects } = props
+  const { modalOpen, closeModal, projects, updateProjects, id } = props
   const options = projects.map((proj) => { return { value: proj, label: proj } })
 
   const setOption = (option) => {
@@ -40,8 +40,8 @@ const ProjectModal = (props) => {
 
   const okHandler = () => {
     console.log('ok clicked, sending', selectedOpt.value)
-    ipcRenderer.send(RENDERER_SETTING_PROJECT, selectedOpt.value)
-    this.props.closeModal()
+    ipcRenderer.send(RENDERER_SETTING_PROJECT, selectedOpt.value, id)
+    closeModal()
   }
 
   const placeholder = projects.length > 0 ? 'Select' : 'Type Project Name'
@@ -62,7 +62,7 @@ const ProjectModal = (props) => {
           options={options}
         />
         <button onClick={okHandler}>Ok</button>
-        <button onClick={this.props.closeModal}>Cancel</button>
+        <button onClick={closeModal}>Cancel</button>
       </div>
     </Modal>
   )
