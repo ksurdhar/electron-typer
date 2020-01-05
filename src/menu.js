@@ -56,7 +56,7 @@ module.exports = function (window) {
     {
       label: `Engine`,
       submenu: [
-        { label: `Open Devtools`, accelerator: "cmd+alt+i", role: 'toggledevtools' },
+        { label: `Open Devtools`, accelerator: 'cmd+alt+i', role: 'toggledevtools' },
         { label: `Quit`, click: () => app.quit() }
       ]
     },
@@ -64,7 +64,7 @@ module.exports = function (window) {
       label: `File`,
       submenu: [
         {
-          label: `New File`, accelerator: "cmd+n", click: () => {
+          label: `New File`, accelerator: 'cmd+n', click: () => {
             // probably save existing file first
             currentFilePath = null
             window.webContents.send(INITIATE_NEW_FILE)
@@ -72,7 +72,7 @@ module.exports = function (window) {
         },
         { type: 'separator' },
         {
-          label: `Open...`, accelerator: "cmd+o", click: () => {
+          label: `Open...`, accelerator: 'cmd+o', click: () => {
             dialog.showOpenDialog({
               properties: ['openFile'], filters: [{ name: 'PDF Files', extensions: ['pdf'] }] 
             }).then((result) => {
@@ -86,28 +86,24 @@ module.exports = function (window) {
         },
         { type: 'separator' },
         {
-          label: `Save`, accelerator: "cmd+s", click: () => {
+          label: `Save`, accelerator: 'cmd+s', click: () => {
             window.webContents.send(INITIATE_SAVE, { saveAs: false })
           }
         },
         {
-          label: `Save As...`, accelerator: "shift+cmd+s", click: () => {
+          label: `Save As...`, accelerator: 'shift+cmd+s', click: () => {
             window.webContents.send(INITIATE_SAVE, { saveAs: true })
           }
         }
       ]
     },
     {
-      label: "Edit",
-      submenu: [
-        { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
-        { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
-        { type: "separator" },
-        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
-        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-        { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
-      ]
+      label: 'Edit',
+      role: 'editMenu'
+    },
+    {
+      label: 'View',
+      role: 'viewMenu'
     }
   ])
 }

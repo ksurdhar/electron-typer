@@ -46,33 +46,29 @@ const LISTS = { // want to set in state, eventually redux or something
 const PROJECTS = ['project1']
 
 const App = () => {
-  const [ ipcSubscribed, setIpcSubscribed ] = useState(false)
   const [ modalOpen, setModalOpen] = useState(false)
   const [ listOpen, setListOpen ] = useState(false)
   const [ lists, setLists ] = useState(LISTS)
   const [ projects, setProjects ] = useState([])
 
   useEffect(() => {
-    if (!ipcSubscribed) {
-      ipcRenderer.on(OPEN_DOCUMENT, (event, data) => { // when saved show notification on screen
-        console.log('opening document')
-        // textArea.value = data
-      })
+    ipcRenderer.on(OPEN_DOCUMENT, (event, data) => { // when saved show notification on screen
+      console.log('opening document', data)
+      // textArea.value = data
+    })
 
-      ipcRenderer.on(INITIATE_SAVE, (event, data) => {
-        console.log('initiate save')
-        // ipcRenderer.send(RENDERER_SENDING_SAVE_DATA, textArea.value, data.saveAs)
-      })
+    ipcRenderer.on(INITIATE_SAVE, (event, data) => {
+      console.log('initiate save', data)
+      // ipcRenderer.send(RENDERER_SENDING_SAVE_DATA, textArea.value, data.saveAs)
+    })
 
-      ipcRenderer.on(INITIATE_NEW_FILE, (event, data) => {
-        console.log('initiate save file')
-        // textArea.value = ''
-        // textArea.setSelectionRange(0, 0)
-        // setTimeout(resize, 1)
-      })
-      setIpcSubscribed(true)
-    }
-  }, [ipcSubscribed])
+    ipcRenderer.on(INITIATE_NEW_FILE, (event, data) => {
+      console.log('initiate save file', data)
+      // textArea.value = ''
+      // textArea.setSelectionRange(0, 0)
+      // setTimeout(resize, 1)
+    })
+  }, [])
 
   let containerRef = React.createRef()
   const getContainer = () => {
