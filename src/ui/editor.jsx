@@ -3,6 +3,12 @@ import React from 'react'
 import ReactQuill from 'react-quill'
 // const Delta = Quill.import('delta')
 import { css, jsx } from '@emotion/core'
+import {
+  OPEN_DOCUMENT,
+  RENDERER_SENDING_SAVE_DATA,
+  INITIATE_SAVE,
+  INITIATE_NEW_FILE,
+} from '../actions/types'
 
 import 'react-quill/dist/quill.snow.css'
 
@@ -41,7 +47,6 @@ class Editor extends React.Component {
 
               const idx = activeList && listIdx + 1 <= lists[activeList].length - 1 ? listIdx + 1 : 0
               const matchedList = activeList ? lists[activeList] : lists[currentWord] 
-              console.log()
               if (matchedList) {
                 this.quilly.deleteText(wordPositions.start, wordLength)
                 const newDelta = this.quilly.insertText(wordPositions.start, matchedList[idx])
@@ -63,6 +68,26 @@ class Editor extends React.Component {
 
     this.changeHandler = this.changeHandler.bind(this)
     this.colorListWord = this.colorListWord.bind(this)
+
+    ipcRenderer.on(OPEN_DOCUMENT, (event, data) => { // when saved show notification on screen
+      console.log('opening document', data)
+      this.quilly.setContents(data)
+      this.setState({ text: data })
+    })
+
+    ipcRenderer.on(INITIATE_SAVE, (event, data) => {
+      console.log('initiate save', data)
+      ipcRenderer.send(RENDERER_SENDING_SAVE_DATA, this.state.text, data.saveAs)
+    })
+
+    ipcRenderer.on(INITIATE_NEW_FILE, (event, data) => {
+      console.log('initiate new file', data)
+      // textArea.value = ''
+    })
+  }
+
+  componentDidMount() {
+    this.quilly = this.quillRef.current.getEditor()
   }
 
   getWordString(range) {
@@ -118,20 +143,11 @@ class Editor extends React.Component {
     })
   }
 
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   console.log('STATE', this.state)
-  //   console.log('NEXT STATE', nextState)
-  //   if (this.state.text === nextState.text) {
-  //     return false
-  //   }
-  //   return true
-  // }
-
   render() {
     const keyPressHandler = (event) => {
       // placeholder
     }
-    console.log(this.state.text)
+    // console.log(this.state.text)
     return (
       <div css={containerCss}>
         <ReactQuill
@@ -148,19 +164,13 @@ class Editor extends React.Component {
                 window.scrollTo({ top: top - 14, behavior: 'smooth' })
               }, 200)
             }
-
-            if (!this.quilly) {
-              this.quilly = this.quillRef.current.getEditor()
-            }
         
             this.colorRows(range)
 
             const newWordPos = this.determineWordRange(range)
             const wordString = this.getWordString(range)
             const currentWordInActiveList = this.props.lists[activeList] && wordString === this.props.lists[activeList][listIdx]
-            // console.log('active list', LISTS[activeList])
             console.log('word string', this.getWordString(range))
-            // console.log('list match', LISTS[activeList] && LISTS[activeList][listIdx])
             const newListIdx = currentWordInActiveList ? listIdx : 0
             const newActiveList = currentWordInActiveList ? activeList : null
 

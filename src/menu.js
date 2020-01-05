@@ -13,41 +13,39 @@ module.exports = function (window) {
   let currentFilePath
 
   function sendFileToRenderer(path) {
-    fs.readFile(path, 'utf8', function (err, data) {
+    fs.readFile(path, function (err, data) {
       if (err) return console.log(err)
-      console.log('READ FILE!', data)
-      // perform pdf to html
 
+      const jsonData = JSON.parse(data)
       currentFilePath = path
-      window.webContents.send(OPEN_DOCUMENT, data)
+      window.webContents.send(OPEN_DOCUMENT, jsonData)
     })
   }
 
-  ipcMain.on(RENDERER_SENDING_SAVE_DATA, (event, data, saveAs) => {
+  ipcMain.on(RENDERER_SENDING_SAVE_DATA, async (event, data, saveAs) => {
     if (currentFilePath && saveAs === false) {
-      fs.writeFile(currentFilePath, data, (err, data) => {
+      fs.writeFile(currentFilePath, JSON.stringify(data), (err, data) => {
         if (err) return console.log(err)
         console.log('saved existing file!')
       })
-    } else {
-      dialog.showSaveDialog({
+    } 
+    else {
+      const { filePath, canceled } = await dialog.showSaveDialog({
         filters: [{
-          name: 'Text Files',
-          extensions: ['txt']
+          name: 'JSON Files',
+          extensions: ['json']
         }]
-      }, (fileNameAndPath) => {
-        if (!fileNameAndPath) {
-          console.log('user cancelled action')
-          return
-        }
-        currentFilePath = fileNameAndPath
-
-        const writeStream = fs.createWriteStream(fileNameAndPath)
-        writeStream.once('open', () => {
-          writeStream.write(data)
-          writeStream.end()
-          console.log('finished writing!')
-        })
+      })
+      if (canceled) {
+        console.log('user cancelled action')
+        return
+      }
+      currentFilePath = filePath
+      const writeStream = fs.createWriteStream(filePath)
+      writeStream.once('open', () => {
+        writeStream.write(JSON.stringify(data))
+        writeStream.end()
+        console.log('finished writing!')
       })
     }
   })
@@ -72,16 +70,15 @@ module.exports = function (window) {
         },
         { type: 'separator' },
         {
-          label: `Open...`, accelerator: 'cmd+o', click: () => {
-            dialog.showOpenDialog({
-              properties: ['openFile'], filters: [{ name: 'PDF Files', extensions: ['pdf'] }] 
-            }).then((result) => {
-              if (result.canceled) {
-                console.log('user cancelled action')
-                return
-              }
-              sendFileToRenderer(result.filePaths[0])
+          label: `Open...`, accelerator: 'cmd+o', click: async () => {
+            const { filePaths, canceled } = await dialog.showOpenDialog({
+              properties: ['openFile'], filters: [{ extensions: ['json'] }] 
             })
+            if (canceled) {
+              console.log('user cancelled action')
+              return
+            }
+            sendFileToRenderer(filePaths[0])
           }
         },
         { type: 'separator' },
