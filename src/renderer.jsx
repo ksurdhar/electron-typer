@@ -57,6 +57,7 @@ class App extends React.Component {
       lists: LISTS,
       projects: [],
       activeProject: null,
+      openingFile: false
     }
 
     ipcRenderer.on(OPEN_DOCUMENT, (event, data) => { // when saved show notification on screen
@@ -64,16 +65,16 @@ class App extends React.Component {
       const { text, id } = data
       this.setState({
         id,
-        text
+        text,
+        openingFile: true
       })
     })
 
     ipcRenderer.on(INITIATE_SAVE, (event, data) => {
-      const foo = text
+      const { id, text } = this.state
       const payload = {
-        baz: bar,
-        text: foo,
-        id: id ? id : generateId()
+        text,
+        id: id ? id : generateId(),
       }
       console.log('initiate save', payload)
       ipcRenderer.send(RENDERER_SENDING_SAVE_DATA, payload, data.saveAs)
@@ -130,13 +131,20 @@ class App extends React.Component {
   }
 
   render() {
-    const { lists, text, id, projects, listOpen, modalOpen } = this.state
+    const { lists, text, id, projects, listOpen, modalOpen, openingFile } = this.state
     return (
       <div css={containerCss}>
         <div id='top-spacer' css={topSpacerCss} />
         <div id='hidden-toolbar' css={toolbarStyles} />
         <div css={mainCss}>
-          <Editor lists={lists} text={text} id={id} setText={this.updateText} />
+          <Editor 
+            lists={lists} 
+            text={text} 
+            id={id} 
+            setText={this.updateText} 
+            openingFile={openingFile} 
+            finishedOpening={() => this.setState({ openingFile: false })}
+          />
           {!listOpen && <Toolbar openList={this.openList} openModal={this.openModal} />}
           {listOpen && <Sublists closeList={this.closeList} modifyLists={this.modifyLists} lists={lists} />}
         </div>

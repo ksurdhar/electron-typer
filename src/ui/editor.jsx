@@ -69,9 +69,11 @@ class Editor extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.id && this.props.id !== prevProps) {
-      console.log('id was updated, file was opened')
-      this.quilly.setContents(this.props.text) // needs a reference
+    if (this.props.openingFile && !prevProps.openingFile ) {
+      console.log('file was opened')
+      this.quilly.setContents(this.props.text)
+      this.quilly.setSelection(this.quilly.getLength())
+      this.props.finishedOpening()
     }
   }
 

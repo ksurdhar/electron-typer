@@ -19,6 +19,7 @@ module.exports = function (window) {
       if (err) return console.log(err)
 
       const jsonData = JSON.parse(data)
+      console.log('JSON DATA', jsonData)
       currentFilePath = path
       window.webContents.send(OPEN_DOCUMENT, jsonData)
     })
