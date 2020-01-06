@@ -142,34 +142,36 @@ class Editor extends React.Component {
           onKeyPress={keyPressHandler}
           onChange={this.changeHandler}
           onChangeSelection={(range, source, editor) => {
-            const { row, activeList, listIdx } = this.state
-            const { top } = editor.getBounds(range.index)
-            const rowNumber = (top - 14 + ROW_HEIGHT) / ROW_HEIGHT
-            if (row !== rowNumber) {
-              setTimeout(() => {
-                window.scrollTo({ top: top - 14, behavior: 'smooth' })
-              }, 200)
+            if (this.quilly.hasFocus()) {
+              const { row, activeList, listIdx } = this.state
+              const { top } = editor.getBounds(range.index)
+              const rowNumber = (top - 14 + ROW_HEIGHT) / ROW_HEIGHT
+              if (row !== rowNumber) {
+                setTimeout(() => {
+                  window.scrollTo({ top: top - 14, behavior: 'smooth' })
+                }, 200)
+              }
+          
+              this.colorRows(range)
+  
+              const newWordPos = this.determineWordRange(range)
+              const wordString = this.getWordString(range)
+              const currentWordInActiveList = this.props.lists[activeList] && wordString === this.props.lists[activeList][listIdx]
+              console.log('word string', this.getWordString(range))
+              const newListIdx = currentWordInActiveList ? listIdx : 0
+              const newActiveList = currentWordInActiveList ? activeList : null
+  
+              if (currentWordInActiveList) { // doesnt work while tabbing - only repositioning selection
+                this.colorListWord(wordString)
+              }
+  
+              this.setState({
+                row: rowNumber,
+                wordPositions: newWordPos,
+                activeList: newActiveList,
+                listIdx: newListIdx
+              })
             }
-        
-            this.colorRows(range)
-
-            const newWordPos = this.determineWordRange(range)
-            const wordString = this.getWordString(range)
-            const currentWordInActiveList = this.props.lists[activeList] && wordString === this.props.lists[activeList][listIdx]
-            console.log('word string', this.getWordString(range))
-            const newListIdx = currentWordInActiveList ? listIdx : 0
-            const newActiveList = currentWordInActiveList ? activeList : null
-
-            if (currentWordInActiveList) { // doesnt work while tabbing - only repositioning selection
-              this.colorListWord(wordString)
-            }
-
-            this.setState({
-              row: rowNumber,
-              wordPositions: newWordPos,
-              activeList: newActiveList,
-              listIdx: newListIdx
-            })
           }}
           modules={this.modules}
         />
