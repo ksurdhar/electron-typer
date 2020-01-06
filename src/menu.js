@@ -57,6 +57,7 @@ module.exports = function (window) {
     console.log('documents', documents)
     settings.set(`projects.${name}.documents`, documents.concat(docId))
     console.log('checking set', settings.get(`projects.${name}`))
+    settings.set(`documents.${docId}.project`, name)
   })
 
   ipcMain.on(RENDERER_SENDING_SAVE_DATA, async (event, data, saveAs) => {

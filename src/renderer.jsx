@@ -13,7 +13,7 @@ import {
   INITIATE_NEW_FILE,
   APP_LOADED,
   SENDING_SETTINGS,
-  LISTS_UPDATED
+  LISTS_UPDATED,
 } from './actions/types'
 import { generateId } from './ui/generateId'
 
@@ -72,19 +72,24 @@ class App extends React.Component {
 
     ipcRenderer.on(OPEN_DOCUMENT, (event, data) => { // when saved show notification on screen
       console.log('opening document', data)
-      const { text, id } = data
+      const { text, id, activeProject } = data
+
+      const lists = activeProject ? this.state.settings[activeProject].sublists : []
+      console.log('lists from opening', lists)
       this.setState({
         id,
         text,
-        openingFile: true
+        openingFile: true,
+        lists
       })
     })
 
     ipcRenderer.on(INITIATE_SAVE, (event, data) => {
-      const { id, text } = this.state
+      const { id, text, activeProject } = this.state
       const payload = {
         text,
         id: id ? id : generateId(),
+        activeProject
       }
       console.log('initiate save', payload)
       ipcRenderer.send(RENDERER_SENDING_SAVE_DATA, payload, data.saveAs)
