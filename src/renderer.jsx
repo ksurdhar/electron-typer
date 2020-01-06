@@ -46,8 +46,6 @@ const LISTS = { // want to set in state, eventually redux or something
   '#locations': ['Orach', 'Gomyr', 'Glitterrun']
 }
 
-const PROJECTS = ['project1']
-
 class App extends React.Component {
   constructor(){
     super()
@@ -127,6 +125,7 @@ class App extends React.Component {
     this.setState({ projects })
   }
   modifyLists(activeList, delta) {
+    const { lists } = this.state
     const listEntries = delta.reduce((acc, op) => {
       return acc.concat(op.insert.split('\n').filter((val) => val.length > 0).map((val) => val.trim().replace(/\s+/g, '-')))
     }, [])

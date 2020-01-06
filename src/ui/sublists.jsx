@@ -27,7 +27,7 @@ class Sublists extends React.Component {
     this.changeHandler = this.changeHandler.bind(this)
     this.renderListUi = this.renderListUi.bind(this)
     this.blurHandler = this.blurHandler.bind(this)
-    this.openList = this.openList.bind(this)
+    this.openOrMakeList = this.openOrMakeList.bind(this)
   }
 
   changeHandler(content, delta, source, editor) {
@@ -36,21 +36,24 @@ class Sublists extends React.Component {
     })
   }
 
-  openList(listName) {
-    const lines = this.props.lists[listName] ? this.props.lists[listName].reduce((acc, current) => {
+  openOrMakeList(listName) {
+    const existingList = this.props.lists[listName]
+    const activeList = existingList && listName ? listName : ''
+    const lines = existingList ? existingList.reduce((acc, current) => {
       return acc.concat([
         { insert: current },
         { insert: '\n' },
       ])
-    }, []) : [{ insert: '' }]
+    }, []) : [{ insert: ' ' }]
 
     const delta = [
-      { insert: listName, attributes: { bold: true } },
+      { insert: activeList, attributes: { bold: true } },
       { insert: '\n' },
     ].concat(lines)
-    console.log('listname', listName)
+
+    console.log('listname', activeList)
     this.setState({
-      activeList: listName, 
+      activeList, 
       text: new Delta(delta)
     })
   }
@@ -61,7 +64,7 @@ class Sublists extends React.Component {
 
     const listButtons = keys.map((listName) => {
       return (
-        <button key={listName} onClick={() => this.openList(listName)}>
+        <button key={listName} onClick={() => this.openOrMakeList(listName)}>
           { listName }
         </button>
       )
@@ -69,7 +72,7 @@ class Sublists extends React.Component {
     return (
       <div>
         { listButtons }
-        <button onClick={() => this.openList(' ')}>Create List</button>
+        <button onClick={() => this.openOrMakeList()}>Create List</button>
       </div>
     )
   }
@@ -94,7 +97,7 @@ class Sublists extends React.Component {
     const { activeList, text } = this.state
     return (
       <div css={containerCss} onBlur={this.blurHandler}>
-        { activeList && <ReactQuill
+        { activeList !== null && <ReactQuill
           ref={this.quillRef}
           defaultValue={text || ''}
           onChange={this.changeHandler}
@@ -106,7 +109,7 @@ class Sublists extends React.Component {
           }}
           modules={this.modules}
         /> }
-        { !activeList && this.renderListUi() }
+        { activeList === null && this.renderListUi() }
       </div>
     )
   }
