@@ -89,6 +89,7 @@ class Sublists extends React.Component {
     const isEditing = this.state.activeList
 
     if (!wasEditing && isEditing && this.quillRef) {
+      console.log('focusing!')
       this.quillRef.current.focus()
     }
   }

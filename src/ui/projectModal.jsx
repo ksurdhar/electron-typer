@@ -25,7 +25,7 @@ const containerCss = css`
 
 const ProjectModal = (props) => {
   const [ selectedOpt, setSelectedOpt ] = useState()
-  const { modalOpen, closeModal, projects, updateProjects, id } = props
+  const { modalOpen, closeModal, projects, updateProjects, id, setActiveProject } = props
   const options = projects.map((proj) => { return { value: proj, label: proj } })
 
   const setOption = (option) => {
@@ -40,8 +40,9 @@ const ProjectModal = (props) => {
   }
 
   const okHandler = () => {
-    console.log('ok clicked, sending', selectedOpt.value)
-    ipcRenderer.send(RENDERER_SETTING_PROJECT, selectedOpt.value, id) // wont work well with new files
+    const projectName = selectedOpt.value
+    ipcRenderer.send(RENDERER_SETTING_PROJECT, projectName, id) // wont work well with new files
+    setActiveProject(projectName)
     closeModal()
   }
 

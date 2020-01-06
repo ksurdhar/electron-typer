@@ -12,7 +12,8 @@ import {
   INITIATE_SAVE,
   INITIATE_NEW_FILE,
   APP_LOADED,
-  SENDING_SETTINGS
+  SENDING_SETTINGS,
+  LISTS_UPDATED
 } from './actions/types'
 import { generateId } from './ui/generateId'
 
@@ -56,6 +57,7 @@ class App extends React.Component {
       listOpen: false,
       lists: LISTS,
       projects: [],
+      settings: null,
       activeProject: null,
       openingFile: false
     }
@@ -64,7 +66,7 @@ class App extends React.Component {
       console.log('settings', settings)
       // set projects
       if (settings) {
-        this.setState({ projects: Object.keys(settings) })
+        this.setState({ projects: Object.keys(settings), settings })
       }
     })
 
@@ -103,6 +105,7 @@ class App extends React.Component {
     this.updateText = this.updateText.bind(this)
     this.updateProjects = this.updateProjects.bind(this)
     this.modifyLists = this.modifyLists.bind(this)
+    this.projectSet = this.projectSet.bind(this)
   }
 
   openList() {
@@ -125,7 +128,7 @@ class App extends React.Component {
     this.setState({ projects })
   }
   modifyLists(activeList, delta) {
-    const { lists } = this.state
+    const { lists, activeProject } = this.state
     const listEntries = delta.reduce((acc, op) => {
       return acc.concat(op.insert.split('\n').filter((val) => val.length > 0).map((val) => val.trim().replace(/\s+/g, '-')))
     }, [])
@@ -138,6 +141,18 @@ class App extends React.Component {
 
     this.setState({
       lists: newLists
+    })
+    ipcRenderer.send(LISTS_UPDATED, newLists, activeProject)
+  }
+  projectSet(proj) {
+    const existingProjSettings = this.state.settings[proj]
+    if (existingProjSettings) {
+      console.log('found existing proj', existingProjSettings)
+    }
+
+    this.setState({ 
+      activeProject: proj,
+      lists: existingProjSettings.sublists
     })
   }
 
@@ -166,6 +181,7 @@ class App extends React.Component {
           projects={projects}
           closeModal={this.closeModal}
           updateProjects={this.updateProjects}
+          setActiveProject={this.projectSet}
         />
       </div>
     )

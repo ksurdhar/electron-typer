@@ -9,7 +9,8 @@ const {
   RENDERER_SETTING_PROJECT,
   RENDERER_CREATING_PROJECT,
   APP_LOADED,
-  SENDING_SETTINGS
+  SENDING_SETTINGS,
+  LISTS_UPDATED
 } = require(path.resolve('./src/actions/types.js'))
 
 var fs = require('fs')
@@ -23,6 +24,7 @@ module.exports = function (window) {
 
       const jsonData = JSON.parse(data)
       console.log('JSON DATA', jsonData)
+      
       currentFilePath = path
       window.webContents.send(OPEN_DOCUMENT, jsonData)
     })
@@ -32,6 +34,13 @@ module.exports = function (window) {
   ipcMain.on(APP_LOADED, async (event, name) => {
     const projSettings = settings.get('projects') // should eventually include all settings
     window.webContents.send(SENDING_SETTINGS, projSettings)
+  })
+
+  ipcMain.on(LISTS_UPDATED, async (event, lists, projectName) => {
+    console.log('lists have been updated', projectName, lists)
+    settings.set(`projects.${projectName}.sublists`, lists)
+    const project = settings.get(`projects.${projectName}`)
+    console.log('checking set', project)
   })
 
   ipcMain.on(RENDERER_CREATING_PROJECT, async (event, name) => {
