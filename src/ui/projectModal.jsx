@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { css, jsx } from '@emotion/core'
 import Modal from 'react-modal'
 import Creatable from 'react-select/creatable'
-import { RENDERER_SETTING_PROJECT } from '../actions/types'
+import { RENDERER_SETTING_PROJECT, RENDERER_CREATING_PROJECT } from '../actions/types'
 
 Modal.setAppElement('#root')
 
@@ -36,11 +36,12 @@ const ProjectModal = (props) => {
   const addProject = (project) => {
     updateProjects(projects.concat([project]))
     setSelectedOpt({ value: project, label: project })
+    ipcRenderer.send(RENDERER_CREATING_PROJECT, project)
   }
 
   const okHandler = () => {
     console.log('ok clicked, sending', selectedOpt.value)
-    ipcRenderer.send(RENDERER_SETTING_PROJECT, selectedOpt.value, id)
+    ipcRenderer.send(RENDERER_SETTING_PROJECT, selectedOpt.value, id) // wont work well with new files
     closeModal()
   }
 

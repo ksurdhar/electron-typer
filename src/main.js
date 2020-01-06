@@ -13,9 +13,6 @@ let mainWindow;
 
 const init = () => {
   createWindow()
-  // console.log('setting value!')
-  // settings.set('testing.banana', 'hello-world')
-  console.log('getting value', settings.get('testing.banana'))
 }
 
 const createWindow = () => {
@@ -44,7 +41,9 @@ const createWindow = () => {
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
     mainWindow = null;
-  });
+  })
+
+  return mainWindow
 };
 
 // This method will be called when Electron has finished

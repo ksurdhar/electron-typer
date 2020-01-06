@@ -11,6 +11,8 @@ import {
   RENDERER_SENDING_SAVE_DATA,
   INITIATE_SAVE,
   INITIATE_NEW_FILE,
+  APP_LOADED,
+  SENDING_SETTINGS
 } from './actions/types'
 import { generateId } from './ui/generateId'
 
@@ -60,6 +62,14 @@ class App extends React.Component {
       openingFile: false
     }
 
+    ipcRenderer.on(SENDING_SETTINGS, (event, settings) => {
+      console.log('settings', settings)
+      // set projects
+      if (settings) {
+        this.setState({ projects: Object.keys(settings) })
+      }
+    })
+
     ipcRenderer.on(OPEN_DOCUMENT, (event, data) => { // when saved show notification on screen
       console.log('opening document', data)
       const { text, id } = data
@@ -85,6 +95,8 @@ class App extends React.Component {
       // clear out information
       // textArea.value = ''
     })
+
+    ipcRenderer.send(APP_LOADED)
 
     this.openList = this.openList.bind(this)
     this.closeList = this.closeList.bind(this)

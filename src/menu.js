@@ -6,7 +6,10 @@ const {
   INITIATE_SAVE,
   INITIATE_NEW_FILE,
   RENDERER_SENDING_SAVE_DATA,
-  RENDERER_SETTING_PROJECT
+  RENDERER_SETTING_PROJECT,
+  RENDERER_CREATING_PROJECT,
+  APP_LOADED,
+  SENDING_SETTINGS
 } = require(path.resolve('./src/actions/types.js'))
 
 var fs = require('fs')
@@ -25,9 +28,26 @@ module.exports = function (window) {
     })
   }
 
-  ipcMain.on(RENDERER_SETTING_PROJECT, async (event, data, saveAs) => {
-    console.log('renderer set project', data)
-    // settings.set()
+  
+  ipcMain.on(APP_LOADED, async (event, name) => {
+    const projSettings = settings.get('projects') // should eventually include all settings
+    window.webContents.send(SENDING_SETTINGS, projSettings)
+  })
+
+  ipcMain.on(RENDERER_CREATING_PROJECT, async (event, name) => {
+    console.log('renderer created new project', name)
+    settings.set(`projects.${name}`, {
+      documents: [],
+      sublists:[]
+    })
+  })
+
+  ipcMain.on(RENDERER_SETTING_PROJECT, async (event, name, docId) => {
+    console.log('renderer set project', name, docId)
+    const documents = settings.get(`projects.${name}.documents`)
+    console.log('documents', documents)
+    settings.set(`projects.${name}.documents`, documents.concat(docId))
+    console.log('checking set', settings.get(`projects.${name}`))
   })
 
   ipcMain.on(RENDERER_SENDING_SAVE_DATA, async (event, data, saveAs) => {
