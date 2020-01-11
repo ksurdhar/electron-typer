@@ -10,9 +10,9 @@ Modal.setAppElement('#root')
 const modalStyles = {
   content: {
     width: '50%',
-    height: '200px',
+    maxHeight: '300px',
     left: '25%',
-    top: '25%'
+    top: '10%'
   }
 }
 
@@ -28,10 +28,12 @@ const ProjectModal = (props) => {
   const options = projects.map((proj) => { return { value: proj, label: proj } })
 
   const setOption = (option) => {
-    const project = option.value
-    console.log('option selected', project)
+    console.log('option selected', option)
+    const project = option && option.value || null
+    if (option) {
+      ipcRenderer.send(RENDERER_SETTING_PROJECT, project, id)
+    }
     setActiveProject(project)
-    ipcRenderer.send(RENDERER_SETTING_PROJECT, project, id)
   }
 
   const addProject = (project) => {
@@ -53,7 +55,7 @@ const ProjectModal = (props) => {
           placeholder={placeholder}
           formatCreateLabel={(val) => `Create New Project`}
           noOptionsMessage={() => 'no projects exist yet'}
-          value={activeProject ? { label: activeProject, value: activeProject } : activeProject} 
+          value={activeProject ? { label: activeProject, value: activeProject } : ''} 
           onChange={setOption} 
           onCreateOption={addProject} 
           options={options}
