@@ -59,7 +59,8 @@ class App extends React.Component {
       projects: [],
       settings: {},
       activeProject: null,
-      openingFile: false
+      openingFile: false,
+      newDocument: true
     }
 
     ipcRenderer.on(SENDING_SETTINGS, (event, settings) => {
@@ -82,18 +83,13 @@ class App extends React.Component {
         openingFile: true,
         lists,
         activeProject,
+        newDocument: false
       })
     })
 
     ipcRenderer.on(INITIATE_SAVE, (event, data) => {
-      const { id, text, activeProject } = this.state
-      const payload = {
-        text,
-        id,
-        activeProject
-      }
-      console.log('initiate save', payload)
-      ipcRenderer.send(RENDERER_SENDING_SAVE_DATA, payload, data.saveAs)
+      this.saveDocument(data.saveAs)
+      this.setState({ newDocument: false })
     })
 
     ipcRenderer.on(INITIATE_NEW_FILE, (event, data) => {
@@ -112,6 +108,18 @@ class App extends React.Component {
     this.updateProjects = this.updateProjects.bind(this)
     this.modifyLists = this.modifyLists.bind(this)
     this.projectSet = this.projectSet.bind(this)
+    this.saveDocument = this.saveDocument.bind(this)
+  }
+
+  saveDocument(saveAs = false) {
+    const { id, text, activeProject } = this.state
+    const payload = {
+      text,
+      id,
+      activeProject
+    }
+    console.log('initiating save', payload)
+    ipcRenderer.send(RENDERER_SENDING_SAVE_DATA, payload, saveAs)
   }
 
   openList() {
@@ -125,6 +133,11 @@ class App extends React.Component {
   }
   closeModal() {
     this.setState({ modalOpen: false })
+
+    if (!this.state.newDocument) {
+      console.log('saving projects')
+      this.saveDocument()
+    }
   }
   updateText(val) {
     console.log('updating text in renderer', val)
