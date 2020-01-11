@@ -4,6 +4,9 @@ import { css, jsx } from '@emotion/core'
 import Modal from 'react-modal'
 import Creatable from 'react-select/creatable'
 import { RENDERER_SETTING_PROJECT, RENDERER_CREATING_PROJECT } from '../actions/types'
+import AppBar from '@material-ui/core/AppBar'
+import Tabs from '@material-ui/core/Tabs'
+import Tab from '@material-ui/core/Tab'
 
 Modal.setAppElement('#root')
 
@@ -24,6 +27,7 @@ const containerCss = css`
 `
 
 const ProjectModal = (props) => {
+  const [value, setValue] = useState(0)
   const { modalOpen, closeModal, projects, updateProjects, id, setActiveProject, activeProject } = props
   const options = projects.map((proj) => { return { value: proj, label: proj } })
 
