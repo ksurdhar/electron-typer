@@ -43,20 +43,16 @@ module.exports = function (window) {
     console.log('checking set', project)
   })
 
-  ipcMain.on(RENDERER_CREATING_PROJECT, async (event, name) => {
+  ipcMain.on(RENDERER_CREATING_PROJECT, async (event, name, docId) => {
     console.log('renderer created new project', name)
     settings.set(`projects.${name}`, {
-      documents: [],
       sublists:[]
     })
+    settings.set(`documents.${docId}.project`, name)
   })
 
   ipcMain.on(RENDERER_SETTING_PROJECT, async (event, name, docId) => {
     console.log('renderer set project', name, docId)
-    const documents = settings.get(`projects.${name}.documents`)
-    console.log('documents', documents)
-    settings.set(`projects.${name}.documents`, documents.concat(docId))
-    console.log('checking set', settings.get(`projects.${name}`))
     settings.set(`documents.${docId}.project`, name)
   })
 

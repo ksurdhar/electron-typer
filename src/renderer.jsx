@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import React, {useState, useEffect} from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom'
 import { css, jsx } from '@emotion/core' 
 import Editor from './ui/editor'
@@ -51,13 +51,13 @@ class App extends React.Component {
   constructor(){
     super()
     this.state = {
-      id: null,
+      id: generateId(), // generates a unique id by default
       text: null,
       modalOpen: false,
       listOpen: false,
       lists: LISTS,
       projects: [],
-      settings: null,
+      settings: {},
       activeProject: null,
       openingFile: false
     }
@@ -80,7 +80,8 @@ class App extends React.Component {
         id,
         text,
         openingFile: true,
-        lists
+        lists,
+        activeProject,
       })
     })
 
@@ -88,7 +89,7 @@ class App extends React.Component {
       const { id, text, activeProject } = this.state
       const payload = {
         text,
-        id: id ? id : generateId(),
+        id,
         activeProject
       }
       console.log('initiate save', payload)
@@ -129,8 +130,22 @@ class App extends React.Component {
     console.log('updating text in renderer', val)
     this.setState({ text: val })
   }
-  updateProjects(projects) {
-    this.setState({ projects })
+  updateProjects(project) {
+    this.setState({ 
+      projects: this.state.projects.concat([project]),
+      activeProject: project
+    })
+  }
+  projectSet(proj) { // assumes project already exist
+    const existingProjSettings = this.state.settings[proj]
+    if (existingProjSettings) {
+      console.log('found existing proj', existingProjSettings)
+    }
+
+    this.setState({
+      activeProject: proj,
+      lists: existingProjSettings ? existingProjSettings.sublists : []
+    })
   }
   modifyLists(activeList, delta) {
     const { lists, activeProject } = this.state
@@ -149,20 +164,9 @@ class App extends React.Component {
     })
     ipcRenderer.send(LISTS_UPDATED, newLists, activeProject)
   }
-  projectSet(proj) {
-    const existingProjSettings = this.state.settings[proj]
-    if (existingProjSettings) {
-      console.log('found existing proj', existingProjSettings)
-    }
-
-    this.setState({ 
-      activeProject: proj,
-      lists: existingProjSettings.sublists
-    })
-  }
 
   render() {
-    const { lists, text, id, projects, listOpen, modalOpen, openingFile } = this.state
+    const { lists, text, id, projects, listOpen, modalOpen, openingFile, activeProject } = this.state
     return (
       <div css={containerCss}>
         <div id='top-spacer' css={topSpacerCss} />
@@ -184,6 +188,7 @@ class App extends React.Component {
           id={id}
           modalOpen={modalOpen}
           projects={projects}
+          activeProject={activeProject}
           closeModal={this.closeModal}
           updateProjects={this.updateProjects}
           setActiveProject={this.projectSet}

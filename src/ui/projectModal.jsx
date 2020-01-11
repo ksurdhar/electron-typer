@@ -24,32 +24,27 @@ const containerCss = css`
 `
 
 const ProjectModal = (props) => {
-  const [ selectedOpt, setSelectedOpt ] = useState()
-  const { modalOpen, closeModal, projects, updateProjects, id, setActiveProject } = props
+  const { modalOpen, closeModal, projects, updateProjects, id, setActiveProject, activeProject } = props
   const options = projects.map((proj) => { return { value: proj, label: proj } })
 
   const setOption = (option) => {
-    console.log('option selected', option)
-    setSelectedOpt(option)
+    const project = option.value
+    console.log('option selected', project)
+    setActiveProject(project)
+    ipcRenderer.send(RENDERER_SETTING_PROJECT, project, id)
   }
 
   const addProject = (project) => {
-    updateProjects(projects.concat([project]))
-    setSelectedOpt({ value: project, label: project })
-    ipcRenderer.send(RENDERER_CREATING_PROJECT, project)
-  }
+    console.log('option added')
+    ipcRenderer.send(RENDERER_CREATING_PROJECT, project, id)
 
-  const okHandler = () => {
-    const projectName = selectedOpt.value
-    ipcRenderer.send(RENDERER_SETTING_PROJECT, projectName, id) // wont work well with new files
-    setActiveProject(projectName)
-    closeModal()
+    updateProjects(project)
   }
 
   const placeholder = projects.length > 0 ? 'Select' : 'Type Project Name'
   // probably needs an explanation - question icon 
   return (
-    <Modal isOpen={modalOpen} onRequestClose={closeModal} style={modalStyles}>
+    <Modal isOpen={modalOpen} onRequestClose={closeModal} style={modalStyles} >
       <div>Set Project</div>
       <div css={containerCss}>
         <Creatable
@@ -58,13 +53,11 @@ const ProjectModal = (props) => {
           placeholder={placeholder}
           formatCreateLabel={(val) => `Create New Project`}
           noOptionsMessage={() => 'no projects exist yet'}
-          value={selectedOpt} 
+          value={activeProject ? { label: activeProject, value: activeProject } : activeProject} 
           onChange={setOption} 
           onCreateOption={addProject} 
           options={options}
         />
-        <button onClick={okHandler}>Ok</button>
-        <button onClick={closeModal}>Cancel</button>
       </div>
     </Modal>
   )
