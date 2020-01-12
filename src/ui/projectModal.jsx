@@ -4,8 +4,11 @@ import { css, jsx } from '@emotion/core'
 import Modal from 'react-modal'
 import Creatable from 'react-select/creatable'
 import { RENDERER_SETTING_PROJECT, RENDERER_CREATING_PROJECT } from '../actions/types'
-import Tabs from '@material-ui/core/Tabs'
-import Tab from '@material-ui/core/Tab'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemIcon from '@material-ui/core/ListItemIcon'
+import ListItemText from '@material-ui/core/ListItemText'
+import TextField from '@material-ui/core/TextField'
 
 Modal.setAppElement('#root')
 
@@ -25,68 +28,87 @@ const containerCss = css`
   justify-content: space-around;
 `
 
-const ModalPage = (props) => {
-  const { children, value, index, ...other } = props
+// const ModalPage = (props) => {
+//   const { children, value, index, ...other } = props
 
-  return (
-    <>
-      { value === index ? <div> {children} </div> : null}
-    </>
-  )
-}
+//   return (
+//     <>
+//       { value === index ? <div> {children} </div> : null}
+//     </>
+//   )
+// }
 
-const ProjectModal = (props) => {
-  const [value, setValue] = useState(0)
-  const { modalOpen, closeModal, projects, updateProjects, id, setActiveProject, activeProject } = props
-  const options = projects.map((proj) => { return { value: proj, label: proj } })
-
-  const setOption = (option) => {
-    console.log('option selected', option)
-    const project = option && option.value || null
-    if (option) {
-      ipcRenderer.send(RENDERER_SETTING_PROJECT, project, id)
+class ProjectModal extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      filterString: ''
     }
-    setActiveProject(project)
+
+    this.renderListItems = this.renderListItems.bind(this)
+    this.setActiveProj = this.setActiveProj.bind(this)
+    this.addProject = this.addProject.bind(this)
   }
 
-  const addProject = (project) => {
-    console.log('option added')
-    ipcRenderer.send(RENDERER_CREATING_PROJECT, project, id)
-
-    updateProjects(project)
+  setActiveProj(proj) { 
+    const { id, setActiveProject } = this.props
+    console.log('proj selected', proj)
+    
+    ipcRenderer.send(RENDERER_SETTING_PROJECT, proj, id)
+    setActiveProject(proj)
+    this.setState({
+      filterString: ''
+    })
   }
 
-  const tabClick = (event, newValue) => {
-    setValue(newValue)
+  addProject() {
+    const project = this.state.filterString
+    console.log('adding project', project)
+    ipcRenderer.send(RENDERER_CREATING_PROJECT, project, this.props.id)
+
+    this.setState({ 
+      filterString: ''
+    })
+    this.props.updateProjects(project)
   }
 
-  const placeholder = projects.length > 0 ? 'Select' : 'Type Project Name'
-  // probably needs an explanation - question icon 
-  return (
-    <Modal isOpen={modalOpen} onRequestClose={closeModal} style={modalStyles} >
-      <div>Set Project</div>
-      <Tabs value={value} onChange={tabClick}>
-        <Tab label="Set Projects" id={0}/>
-        <Tab label="Delete Projects" id={1}/>
-      </Tabs>
-      <ModalPage value={value} index={0}>
-        <Creatable
-          styles={{ container: (provided) => { return { ...provided } } }}
-          isClearable
-          placeholder={placeholder}
-          formatCreateLabel={(val) => `Create New Project`}
-          noOptionsMessage={() => 'no projects exist yet'}
-          value={activeProject ? { label: activeProject, value: activeProject } : ''}
-          onChange={setOption}
-          onCreateOption={addProject}
-          options={options}
-        />
-      </ModalPage>
-      <ModalPage value={value} index={1}>
-        <span>hello world</span>
-      </ModalPage>
-    </Modal>
-  )
+  // highlight / diff style active one
+  // button to delete
+  renderListItems() {
+    const filteredProjs = this.props.projects.filter((proj) => proj.indexOf(this.state.filterString) > -1)
+    console.log('filtered projects', filteredProjs)
+
+    if (filteredProjs.length > 0) {
+      return filteredProjs.map((proj) => {
+        return (
+          <ListItem button onClick={() => this.setActiveProj(proj)} key={proj}>
+            <ListItemText primary={proj} />
+          </ListItem>
+        )
+      })
+    }
+    else {
+      return (
+        <ListItem button onClick={this.addProject}>
+          <ListItemText primary="No Match - Create New Project?" />
+        </ListItem>
+      )
+    }
+  }
+
+  render() {
+    const { modalOpen, closeModal } = this.props
+
+    return (
+      <Modal isOpen={modalOpen} onRequestClose={closeModal} style={modalStyles} >
+        <div>Projects</div>
+        <TextField value={this.state.filterString} onChange={(event) => this.setState({ filterString: event.target.value }) }/>
+        <List>
+          { this.renderListItems() }
+        </List>
+      </Modal>
+    )
+  }
 }
-
+  
 export default ProjectModal
