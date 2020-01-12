@@ -143,10 +143,14 @@ class App extends React.Component {
     console.log('updating text in renderer', val)
     this.setState({ text: val })
   }
-  updateProjects(project) {
+  updateProjects(project, remove = false) {
+    const projects = remove 
+      ? this.state.projects.filter((proj) => proj !== project) 
+      : this.state.projects.concat([project])
+
     this.setState({ 
-      projects: this.state.projects.concat([project]),
-      activeProject: project
+      projects,
+      activeProject: remove ? null : project
     })
   }
   projectSet(proj) { // assumes project already exist

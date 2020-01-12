@@ -2,13 +2,19 @@
 import React from 'react'
 import { css, jsx } from '@emotion/core'
 import Modal from 'react-modal'
-import { RENDERER_SETTING_PROJECT, RENDERER_CREATING_PROJECT } from '../actions/types'
+import { 
+  RENDERER_SETTING_PROJECT, 
+  RENDERER_CREATING_PROJECT, 
+  RENDERER_DELETING_PROJECT 
+} from '../actions/types'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemText from '@material-ui/core/ListItemText'
 import TextField from '@material-ui/core/TextField'
 import CheckIcon from '@material-ui/icons/Check'
+import ClearIcon from '@material-ui/icons/Clear'
+import IconButton from '@material-ui/core/IconButton'
 
 Modal.setAppElement('#root')
 
@@ -48,6 +54,7 @@ class ProjectModal extends React.Component {
     this.renderListItems = this.renderListItems.bind(this)
     this.setActiveProj = this.setActiveProj.bind(this)
     this.addProject = this.addProject.bind(this)
+    this.removeProject = this.removeProject.bind(this)
   }
 
   setActiveProj(proj) { 
@@ -58,6 +65,12 @@ class ProjectModal extends React.Component {
     this.setState({
       filterString: ''
     })
+  }
+
+  removeProject(proj) {
+    const isActive = proj === this.props.activeProject
+    ipcRenderer.send(RENDERER_DELETING_PROJECT, proj, isActive ? this.props.id : null)
+    this.props.updateProjects(proj, true)
   }
 
   addProject() {
@@ -87,6 +100,14 @@ class ProjectModal extends React.Component {
                 <CheckIcon />
               </ListItemIcon> 
             }
+            <ListItemIcon>
+              <IconButton size='small' onClick={(event) => {
+                this.removeProject(proj)
+                event.stopPropagation()
+              }}>
+                <ClearIcon fontSize='small' />
+              </IconButton>
+            </ListItemIcon> 
           </ListItem>
         )
       })
@@ -94,7 +115,7 @@ class ProjectModal extends React.Component {
     else {
       return (
         <ListItem button onClick={this.addProject}>
-          <ListItemText primary="No Match - Create New Project?" />
+          <ListItemText primary="No Matches - Create New Project" />
         </ListItem>
       )
     }

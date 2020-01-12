@@ -8,6 +8,7 @@ const {
   RENDERER_SENDING_SAVE_DATA,
   RENDERER_SETTING_PROJECT,
   RENDERER_CREATING_PROJECT,
+  RENDERER_DELETING_PROJECT,
   APP_LOADED,
   SENDING_SETTINGS,
   LISTS_UPDATED
@@ -49,6 +50,15 @@ module.exports = function (window) {
       sublists:[]
     })
     settings.set(`documents.${docId}.project`, name)
+  })
+
+  ipcMain.on(RENDERER_DELETING_PROJECT, async (event, name, docId) => {
+    console.log('renderer deleted project', name, docId)
+    settings.delete(`projects.${name}`)
+    if (docId) {
+      console.log('removing active project from document')
+      settings.delete(`documents.${docId}.project`)
+    }
   })
 
   ipcMain.on(RENDERER_SETTING_PROJECT, async (event, name, docId) => {
