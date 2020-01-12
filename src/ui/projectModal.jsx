@@ -1,14 +1,14 @@
 /** @jsx jsx */
-import React, { useState } from 'react'
+import React from 'react'
 import { css, jsx } from '@emotion/core'
 import Modal from 'react-modal'
-import Creatable from 'react-select/creatable'
 import { RENDERER_SETTING_PROJECT, RENDERER_CREATING_PROJECT } from '../actions/types'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemText from '@material-ui/core/ListItemText'
 import TextField from '@material-ui/core/TextField'
+import CheckIcon from '@material-ui/icons/Check'
 
 Modal.setAppElement('#root')
 
@@ -52,7 +52,6 @@ class ProjectModal extends React.Component {
 
   setActiveProj(proj) { 
     const { id, setActiveProject } = this.props
-    console.log('proj selected', proj)
     
     ipcRenderer.send(RENDERER_SETTING_PROJECT, proj, id)
     setActiveProject(proj)
@@ -63,7 +62,6 @@ class ProjectModal extends React.Component {
 
   addProject() {
     const project = this.state.filterString
-    console.log('adding project', project)
     ipcRenderer.send(RENDERER_CREATING_PROJECT, project, this.props.id)
 
     this.setState({ 
@@ -80,9 +78,15 @@ class ProjectModal extends React.Component {
 
     if (filteredProjs.length > 0) {
       return filteredProjs.map((proj) => {
+        const isActive = proj === this.props.activeProject
         return (
-          <ListItem button onClick={() => this.setActiveProj(proj)} key={proj}>
+          <ListItem button selected={isActive} onClick={() => this.setActiveProj(proj)} key={proj}>
             <ListItemText primary={proj} />
+            { isActive && 
+              <ListItemIcon>
+                <CheckIcon />
+              </ListItemIcon> 
+            }
           </ListItem>
         )
       })
