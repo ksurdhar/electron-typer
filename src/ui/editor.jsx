@@ -135,7 +135,7 @@ class Editor extends React.Component {
     }
     // console.log(this.state.text)
     return (
-      <div css={containerCss}>
+      <div css={containerCss} onFocus={() => this.props.closeAll() }>
         <ReactQuill
           ref={this.quillRef}
           defaultValue={this.props.text || ''}

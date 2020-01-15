@@ -6,6 +6,7 @@ import Editor from './ui/editor'
 import Toolbar from './ui/toolbar'
 import Sublists from './ui/sublists'
 import ProjectModal from './ui/projectModal'
+import GoalView from './ui/goalView'
 import {
   OPEN_DOCUMENT,
   RENDERER_SENDING_SAVE_DATA,
@@ -55,6 +56,8 @@ class App extends React.Component {
       text: null,
       modalOpen: false,
       listOpen: false,
+      goalOpen: false,
+      goal: null,
       lists: LISTS,
       projects: [],
       settings: {},
@@ -109,6 +112,10 @@ class App extends React.Component {
     this.modifyLists = this.modifyLists.bind(this)
     this.projectSet = this.projectSet.bind(this)
     this.saveDocument = this.saveDocument.bind(this)
+    this.openGoal = this.openGoal.bind(this)
+    this.closeGoal = this.closeGoal.bind(this)
+    this.updateGoal = this.updateGoal.bind(this)
+    this.closeAll = this.closeAll.bind(this)
   }
 
   saveDocument(saveAs = false) {
@@ -122,6 +129,15 @@ class App extends React.Component {
     ipcRenderer.send(RENDERER_SENDING_SAVE_DATA, payload, saveAs)
   }
 
+  openGoal() {
+    this.setState({ goalOpen: true })
+  }
+  closeGoal() {
+    this.setState({ goalOpen: false })
+  }
+  updateGoal(event) {
+    this.setState({ goal: event.target.value })
+  }
   openList() {
     this.setState({ listOpen: true })
   }
@@ -138,6 +154,13 @@ class App extends React.Component {
       console.log('saving projects')
       this.saveDocument()
     }
+  }
+  closeAll() {
+    this.setState({
+      modalOpen: false,
+      listOpen: false,
+      goalOpen: false
+    })
   }
   updateText(val) {
     console.log('updating text in renderer', val)
@@ -183,7 +206,8 @@ class App extends React.Component {
   }
 
   render() {
-    const { lists, text, id, projects, listOpen, modalOpen, openingFile, activeProject } = this.state
+    const { lists, text, id, projects, listOpen, modalOpen, openingFile, activeProject, goal, goalOpen } = this.state
+    const neitherOpen = !listOpen && !goalOpen
     return (
       <div css={containerCss}>
         <div id='top-spacer' css={topSpacerCss} />
@@ -196,9 +220,12 @@ class App extends React.Component {
             setText={this.updateText} 
             openingFile={openingFile} 
             finishedOpening={() => this.setState({ openingFile: false })}
+            closeAll={this.closeAll}
           />
-          {!listOpen && <Toolbar openList={this.openList} openModal={this.openModal} />}
-          {listOpen && <Sublists closeList={this.closeList} modifyLists={this.modifyLists} lists={lists} />}
+          { neitherOpen && <Toolbar openList={this.openList} openModal={this.openModal} openGoal={this.openGoal} closeGoal={this.closeGoal} />}
+          { listOpen && <Sublists closeList={this.closeList} modifyLists={this.modifyLists} lists={lists} />}
+          { goalOpen && <GoalView closeGoal={this.closeGoal} goal={goal} updateGoal={this.updateGoal}/>}
+
         </div>
         <div id='bottom-spacer' css={bottomSpacerCss} />
         <ProjectModal
