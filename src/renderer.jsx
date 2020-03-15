@@ -2,6 +2,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { css, jsx } from '@emotion/core' 
+import { Quill } from 'react-quill'
+const Delta = Quill.import('delta')
 import Editor from './ui/editor'
 import Toolbar from './ui/toolbar'
 import Sublists from './ui/sublists'
@@ -19,6 +21,7 @@ import {
 import { generateId } from './ui/generateId'
 
 import './index.css'
+
 
 const toolbarStyles = css`
   display: none;
@@ -53,17 +56,17 @@ class App extends React.Component {
     super()
     this.state = {
       id: generateId(), // generates a unique id by default
-      text: null,
+      text: new Delta(),
+      lists: LISTS,
+      projects: [],
+      goal: null,
+      activeProject: null,
+      settings: {},
+      openingFile: false,
       modalOpen: false,
       listOpen: false,
       goalOpen: false,
-      goal: null,
-      lists: LISTS,
-      projects: [],
-      settings: {},
-      activeProject: null,
-      openingFile: false,
-      newDocument: true
+      newDocument: true,
     }
 
     ipcRenderer.on(SENDING_SETTINGS, (event, settings) => {
@@ -162,8 +165,25 @@ class App extends React.Component {
       goalOpen: false
     })
   }
-  updateText(val) {
-    console.log('updating text in renderer', val)
+  updateText(val, operationDelta) {
+    // // console.log('updating text in renderer', val)
+    //     // console.log('change!', operationDelta, editor.getContents())
+    // let deltaToSet = val
+    // let newOpDelta = new Delta()
+    // // if (this.props.goal) {
+    // if (operationDelta.ops[1] && operationDelta.ops[1].delete) {
+    //   console.log('delete operation')
+    // }
+    // else {
+    //   console.log('insert operation')
+    //   // attempt to 
+    //   newOpDelta.retain(1).delete(1).insert('Heeeeyyy', {color: 'black'})
+    // }
+    // // }
+
+    // console.log(deltaToSet.compose(newOpDelta))
+    // const composed = deltaToSet.compose(newOpDelta)
+
     this.setState({ text: val })
   }
   updateProjects(project, remove = false) {
@@ -213,7 +233,8 @@ class App extends React.Component {
         <div id='top-spacer' css={topSpacerCss} />
         <div id='hidden-toolbar' css={toolbarStyles} />
         <div css={mainCss}>
-          <Editor 
+          <Editor
+            goal={goal} 
             lists={lists} 
             text={text} 
             id={id} 

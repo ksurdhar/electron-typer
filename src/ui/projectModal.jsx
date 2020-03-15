@@ -87,7 +87,7 @@ class ProjectModal extends React.Component {
   // button to delete
   renderListItems() {
     const filteredProjs = this.props.projects.filter((proj) => proj.indexOf(this.state.filterString) > -1)
-    console.log('filtered projects', filteredProjs)
+    // console.log('filtered projects', filteredProjs)
 
     if (filteredProjs.length > 0) {
       return filteredProjs.map((proj) => {
