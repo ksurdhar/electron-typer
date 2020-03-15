@@ -1,9 +1,21 @@
 /** @jsx jsx */
 import React from 'react'
-import ReactQuill from 'react-quill'
-// const Delta = Quill.import('delta')
+import ReactQuill, { Quill }  from 'react-quill'
+const Delta = Quill.import('delta')
 import { css, jsx } from '@emotion/core'
 import 'react-quill/dist/quill.snow.css'
+import { LoremIpsum } from 'lorem-ipsum'
+
+const lorem = new LoremIpsum({
+  sentencesPerParagraph: {
+    max: 8,
+    min: 4
+  },
+  wordsPerSentence: {
+    max: 16,
+    min: 4
+  }
+})
 
 const ROW_HEIGHT = 18 // hardcoded. would be better if dynamic
 
@@ -22,8 +34,7 @@ class Editor extends React.Component {
       row: 1,
       listIdx: 0,
       activeList: null,
-      name: null,
-      project: null,
+      goalText: null
     }
     this.quillRef = React.createRef()
     this.quilly = null
@@ -68,12 +79,34 @@ class Editor extends React.Component {
     this.quilly = this.quillRef.current.getEditor()
   }
 
+  // shouldComponentUpdate(prevProps) {
+  //   console.log('diff!', this.props.text.diff(prevProps.text))
+  //   if (this.props.text === prevProps.text) {
+  //     console.log('these are the same!')
+  //     return false
+  //   }
+  //   console.log('these are not the same')
+  //   return true
+  // }
+
   componentDidUpdate(prevProps) {
     if (this.props.openingFile && !prevProps.openingFile ) {
       console.log('file was opened')
       this.quilly.setContents(this.props.text)
       this.quilly.setSelection(this.quilly.getLength())
       this.props.finishedOpening()
+    }
+
+    if (this.props.goal && !prevProps.goal) {
+      const loremText = lorem.generateWords(500)
+      console.log('new goal set! replacing contents', loremText)
+      const delta = new Delta([
+        { insert: loremText, attributes: { bold: true } },
+        { insert: '\n' },
+      ])
+
+      this.quilly.setContents(delta)
+      this.quilly.setSelection(0)
     }
   }
 
@@ -124,14 +157,38 @@ class Editor extends React.Component {
     // })
   }
 
-  changeHandler(content, delta, source, editor) {
-    console.log('change!', editor.getContents())
-    this.props.setText(editor.getContents())
+  changeHandler(content, operationDelta, source, editor) {
+    // console.log('CHANGE SOURCE', source)
+    // console.log('change!', operationDelta, editor.getContents())
+    
+    if (source === 'user') {
+      let deltaToSet = editor.getContents()
+      let newOpDelta = new Delta()
+      // if (this.props.goal) {
+      if (operationDelta.ops[1] && operationDelta.ops[1].delete) {
+        console.log('delete operation')
+      }
+      else {
+        console.log('insert operation')
+        newOpDelta.insert('TEST', { color: 'black' })
+      }
+      // }
+
+      const composed = deltaToSet.compose(newOpDelta)
+      console.log(composed)
+
+      this.props.setText(composed)
+      this.quilly.setContents(composed, 'api')
+    }
   }
 
   render() {
     const keyPressHandler = (event) => {
-      // placeholder
+      // if (this.props.goal) {
+      //   console.log('goal key press!')
+      //   // if we've added a key (how do we identify this?) then remove a character from lorum
+      //   // either check for whether key is valid via map
+      // }
     }
     // console.log(this.state.text)
     return (
@@ -157,7 +214,7 @@ class Editor extends React.Component {
               const newWordPos = this.determineWordRange(range)
               const wordString = this.getWordString(range)
               const currentWordInActiveList = this.props.lists[activeList] && wordString === this.props.lists[activeList][listIdx]
-              console.log('word string', this.getWordString(range))
+              // console.log('word string', this.getWordString(range))
               const newListIdx = currentWordInActiveList ? listIdx : 0
               const newActiveList = currentWordInActiveList ? activeList : null
   
